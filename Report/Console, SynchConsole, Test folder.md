@@ -1,0 +1,135 @@
+# Console
+## Class console
+- Tác dụng: dùng để mô phỏng các thiết bị I/O sử dụng UNIX files.
+- Thời gian để đọc và ghi 1 ký tự tối đa là 100 milli giây.
+- Các thuộc tính:
+	- readFileNo, writeFileNo: số thứ tự của file UNIX dùng để mô phỏng bàn phím và màn hình.
+	- incoming: nếu có dữ liệu, chứa char sẽ được đọc, nếu không, chứa ký tự EOF.
+	- putBusy: cờ báo hiệu chức năng putChar có đang được dùng hay không. Nếu có thì không thể khỏi tạo putChar thêm.
+	- handleArg: chứa tham số sẽ truyền vào hàm gián đoạn.
+	- writeHandler, readHandler: hàm gián đoạn cho nhập và xuất.
+		- writeHandler: được gọi khi hàm putChar I/O hoàn thành.
+		- readHandler: được gọi khi có ký tự được truyền đến từ bàn phím.
+- Các chức năng:
+	- Constructor: bắt đầu giả lập phần cứng nhập xuất của máy tính. Chấp nhận 5 tham số:
+		- readFile: file UNIX dùng để giả lập bàn phím/thiết bị nhập, nếu trống dùng stdin, nhập từ console.
+		- writeFile: file UNIX dùng để giả lập màn hình/thiết bị ghi,xuất, nếu trống dùng stdout, in ra console.
+		- readAvail: hàm gián đoạn khi có ký tự được nhập từ bàn phím/đọc được ký tự từ file.
+		- writeDone: hàm gián đoạn khi một ký tự được in ra thiết bị xuất/màn hình, để báo rằng có thể yêu cầu ký tự tiếp theo được xuất.
+		- Cách hoạt động:
+			- Nếu readFile rỗng, thay thế bằng stdin, nếu không, mở chỉ đọc file nhập UNIX.
+			- Nếu writeFile rỗng, thay thế bằng stdout, nếu không, mở chỉ viết cho file xuất UNIX.
+			- Sau đó, thiết lập các biến giả lập hàm gián đoạn bất đồng bộ.
+			- Cuối cùng, thiết lập hàm gián đoạn CPU, lắng nghe sự kiện, hàm này cũng đánh dấu bắt đầu nhận các packet từ thiết bị nhập xuất, có 4 tham số:
+				- handler: phương thức gián đoạn được dùng.
+				- arg: tham số truyền vào phương thức gián đoạn
+				- when: tham số xác định thời gian gián đoạn, hàm gián đoạn sẽ hoạt động tại thời điểm hàm lắng nghe được gọi + thời gian gián đoạn truyền vào.
+				- type: mã phần cứng dùng để tạo sự kiện gián đoạn,
+	- Destructor: dùng để đóng các file giả lập UNIX.
+		- Cách hoạt động:
+			- Nếu readFile không phải stdin, đóng readFile.
+			- Nếu writeFile không phải stdout, đóng writeFile.
+	- CheckAvail: được gọi theo chu kỳ để kiểm tra nếu một ký tự được nhập vào từ bàn phím. Chỉ đọc các ký tự được nhập nếu nó được đẩy ra khỏi buffer bởi kernel. Gọi hàm gián đoạn của input mỗi khi một ký tự được thêm vào buffer.
+		- Cách hoạt động:
+			- Khởi tạo char.
+			- Lên thời gian cho lần kế tiếp lắng nghe nhập/nhận một packet.
+			- Nếu kết thúc file hoặc khi char trong buffer không còn, kết thúc hàm.
+			- Nếu không, đọc char theo số byte, trả về lỗi nếu có, tăng biến đếm số ký tự từ đã đọc lên 1.
+			- Gọi hàm gián đoạn CPU cho read.
+	- WriteDone: được gọi khi đến lúc gọi hàm gián đoạn để báo cho kernel biết việc xuất/in ký tự đã hoàn thành.
+		- Cách hoạt động:
+			- Cờ putBusy được đặt thành False, cho phép gọi hàm putChar để xuất/in.
+			- Tăng biến đếm số ký tự được in lên 1.
+			- Gọi hàm gián đoạn CPU cho write.
+	- GetChar: đọc một ký tự từ buffer nhập, và trả về ký tự đó hoặc trả về EOF nếu buffer rỗng.
+		- Cách hoạt động:
+			- Gán biến char bằng giá trị của incoming.
+			- Đặt lại giá trị của incoming.
+			- Trả về biến char.
+	- PutChar: hàm cho phép xuất một ký tự ra thiết bị mô phỏng xuất, lên lịch trình hàm gián đoạn cho sau này.
+		- Cách hoạt động:
+			- Nếu putChar đang có 1 tiến trình đang chạy, báo lỗi.
+			- Nếu không, viết vào thiết bị mô phỏng một char với kích thước n bytes.
+			- Bật putBusy lên True
+			- Gọi hàm thiết lập gián đoạn cho write.
+# Synchcons
+## Class synchconsole
+- Tác dụng: Giả lập thiết bị nhập xuất đồng bộ.
+- Các thuộc tính:
+	- cons: một con trỏ đến một object console, nơi ta sẽ chứa thiết bị nhập xuất bất đồng bộ.
+	- Các biến tĩnh của object Semaphore: luồng tiến trình sẽ khiến các yêu cầu nhập xuất chờ Semaphore cho tới khi nhập xuất hoàn thành.
+- Các chức năng:
+	- SynchReadFunc, SynchWriteFunc: Khởi động luồng yêu cầu nhập xuất.
+	- Constructor không tham số:
+		- Tạo một object console với stdin và stdout, sử dụng SynchReadFunc và SynchWriteFunc làm hàm gián đoạn.
+		- Gán cho các biến Semaphore tương ứng với nhập xuất khả dụng, nhập xuất theo các dòng.
+	- Constructor có tham số:
+		- Tương tự constructor không tham số nhưng thay vì dùng stdint và stdout thì sử dụng readFile và writeFile cho thiết bị mô phỏng nhập xuất tương ứng.
+	- Destructor:
+		- Xoá bỏ console, và các biến tĩnh của Semaphore.
+	- Write:
+		- Chức năng: Viết các byte theo số lượng byte cho trước, từ buffer cho trước vào thiết bị nhập xuất.
+		- Cách hoạt động:
+			- Khởi tạo biến loop.
+			- Từ biến Semaphore tĩnh WLineBlock có được khi tạo synchconsole, gọi chức năng P của Semaphore:
+				- Hàm P chờ khi giá trị của Semaphore lớn hơn 0, rồi giảm giá trị đó dần.
+				- Việc kiểm tra giá trị Semaphore và việc giảm giá trị đó phải được thực hiện không gián đoạn. Vì vậy, ta phải tắt hàm gián đoạn khi thực hiện các chức năng này.
+				- Đầu tiên, ta tắt hàm gián đoạn.
+				- Tiếp theo, ta kiểm tra nếu giá trị của Semaphore bằng 0 hay không. Nếu có, đưa luồng tiến trình hiện tại vào hàng chờ và cho luồng tiến trình ngủ.
+				- Nếu không, đồng nghĩa Semaphore khả dụng, ta giảm giá trị của Semaphore.
+				- Trả giá trị cũ cho hàm gián đoạn, đồng nghĩa với việc bật hàm gián đoạn.
+			- Tạo một vòng lặp có độ dài bằng số byte truyền vào.
+				- Nhập char từ buffer truyền vào, vào console bằng hàm putChar.
+				- Gọi hàm Semaphore để chặn các yêu cầu nhập xuất cho một ký tự.
+			- Từ biến Semaphore tĩnh WLineBlock có được khi tạo synchconsole, gọi chức năng V của Semaphore:
+				- Tăng giá trị cho giá trị của Semaphore, đánh thức luồng tiến trình nếu cần thiết.
+				- Đầu tiên, tắt hàm gián đoạn.
+				- Lấy tiến trình đầu tiên ở trong hàng chờ. Nếu tiến trình này không trống thì đánh thức tiến trình này, tăng giá trị Semaphore.
+				- Cuối cùng bật hàm gián đoạn.
+			- Trả về số byte được đọc.
+	- Read:
+		- Chức năng: đọc số byte bằng số lượng byte cho trước từ buffer, vào thiết bị nhập xuất.
+		- Cách hoạt động:
+			- Từ buffer được cho trước, khiến tất cả các byte từ đầu đến vị trí bằng offset số byte đã cho thành 0.
+			- Gọi hàm P cho readLineBlock
+			- Tạo vòng lặp đến khi vượt quá số byte đọc hoặc gặp EOL
+				- Tạo vòng lặp do...while... khi mà byte được đọc là EOL
+					- Chặn tiến trình cho phần đọc 1 ký tự
+					- Đọc char từ console.
+				- Nếu char đọc được là '\012' hoặc '\001' thì EOL và kết thúc vòng lặp.
+				- Nếu không thì thêm char vào loop theo như các vị trí mà ta đã format trong buffer.
+			- Gọi hàm V cho readLineBlock.
+			- Trả về số byte đã đọc hoặc -1 nếu byte đọc được là CTRL-A
+# Folder test
+- Chứa các file C và object dùng để chạy và kiểm thử NachOS, mô phỏng các chương trình.
+## Halt
+- Chức năng: dùng để kiểm thử chạy một chương trình trong NachOS có được không.
+- Cách hoạt động:
+	- Gọi Syscall HALT để shutdown NachOS.
+## Shell
+- Chức năng: Mô phỏng shell trong các hệ điều hành. Sử dụng để chạy các chương trình
+- Cách hoạt động:
+	- Gán address space ID cho chương trình shell.
+	- Tạo 2 OpenFileID chứa input và output cho shell, sử dụng stdin và stdout.
+	- Vòng lặp vĩnh viễn:
+		- Viết -- ra shell, thể hiện bắt đầu nhận input.
+		- Đọc từng ký tự được nhập vào shell cho đến khi gặp ký tự xuống dòng. Sau đó gán giá trị kết thúc chuỗi cho chuỗi đã đọc được.
+		- Nếu user đã nhập chuỗi, thì tạo tiến trình tương ứng với chuỗi đã nhập và chuyển sang tiến trình đó.
+## Sort
+- Chức năng: chương trình kiểm thử sắp xếp một chuỗi lớn bao gồm các số nguyên. Dùng để tạo áp lực/lấp đầy hệ thống bộ nhớ ảo(RAM ảo).
+- Cách hoạt động:
+	- Tạo mảng số nguyên có kích cỡ 1024.
+	- Tạo mảng giảm dần 1024 chữ số.
+	- Sắp xếp mảng theo thuật toán Selection Sort.
+	- Gọi hàm kết thúc với exitCode là số đầu tiên của mảng, nếu hoạt động đúng thì exit code là số 0.
+## Start
+- Chức năng: hỗ trợ ngôn ngữ Assembly for các chương trình chạy trên Hệ điều hành NachOS.
+- Cách hoạt động:
+	- Sử dụng hợp ngữ MIPS để lấy, nhập, thực hiện các phép toán trên các thanh ghi.
+## Matmult
+- Chức năng: chương trình kiểm thử, nhân ma trận cỡ lớn. Dùng để tạo áp lực/lấp đầy hệ thống bộ nhớ ảo(RAM ảo).
+- Cách hoạt động:
+	- Tạo 3 mảng 2D có kích cỡ 20x20.
+	- Lấp đầy các hàng của 2 matrix đầu với các giá trị, matrix thứ 3 sẽ bằng 0.
+	- Thực hiện nhân 2 ma trận đầu, ma trận thứ 3 sẽ lưu kết quả.
+	- Thoát chương trình và trả về exitCode là phần tử cuối cùng của ma trận thứ 3. Nếu hoạt động đúng, exitCode là 0.
