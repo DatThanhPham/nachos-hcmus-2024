@@ -2,9 +2,9 @@
 
 int main ()
 {
+    PrintString("String read: ");
     char* str;
     ReadString(str, 5);
-    PrintString("String read: ");
     PrintString(str);
     Halt();
     return 0;
