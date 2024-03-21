@@ -333,7 +333,74 @@ void ExceptionHandler(ExceptionType which)
 			printf("\n");
 			break;
 		}
+		case SC_ReadInt:
+		{
+			int maxBytes = 256;
+			char* buffer = new char[256];
+			int bytesRead = gSynchConsole->Read(buffer, maxBytes); // doc chuoi tu console
 
+			for (int i = 0; i < bytesRead; i++)
+			{
+				if (i == 0 && buffer[i] == '-') // kiem tra so am
+					continue;
+				if (buffer[i] < '0' || buffer[i] > '9') // kiem tra so nguyen
+				{
+					printf("Khong phai so nguyen!");
+					DEBUG('a', "\nERROR: Khong phai so nguyen!");
+					machine->WriteRegister(2, 0);
+					delete[] buffer;
+					IncreasePC();
+					break;
+				}
+			}
+
+			int number = atoi(buffer); // chuyen chuoi thanh so nguyen
+			machine->WriteRegister(2, number);
+			IncreasePC();
+			break;
+		}
+		case SC_PrintInt:
+		{
+			int number = machine->ReadRegister(4); // doc so nguyen tu thanh ghi r4
+			if (number == 0) // truong hop so bang 0
+			{
+				gSynchConsole->Write("0", 1);
+				IncreasePC();
+				break;
+			}
+
+			// dem so chu so cua so nguyen
+			int temp = number;
+			int digitCount = 0;
+			while (temp != 0)
+			{
+				temp /= 10;
+				digitCount++;
+			}
+			if (number < 0) // truong hop so am
+				digitCount++;
+
+			char* buffer = new char[digitCount + 1];
+			bool negative = false;
+			buffer[digitCount] = '\0'; // sentinel
+			if (number < 0)
+			{
+				negative = true;
+				number *= -1;
+			}	
+			for (int i = digitCount - 1; i >= 0; i--) // chuyen so nguyen thanh chuoi
+			{
+				buffer[i] = (char)(abs(number % 10) + '0');
+				number /= 10;
+			}
+			if (negative) // truong hop so am
+				buffer[0] = '-';
+
+			gSynchConsole->Write(buffer, digitCount + 1); // in chuoi ra console
+			printf("\n");
+			IncreasePC();
+			break;
+		}	
 		case SC_ReadString:
 		{
 

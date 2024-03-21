@@ -34,6 +34,10 @@
 #define SC_ReadChar	13
 #define SC_PrintChar	14
 
+//read int and print int
+#define SC_ReadInt	15
+#define SC_PrintInt	16
+
 //read string and print string
 #define SC_ReadString	17
 #define SC_PrintString	18
