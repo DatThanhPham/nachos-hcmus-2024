@@ -1,0 +1,8 @@
+#include "syscall.h"
+
+int main() 
+{
+	Create("abc.txt");
+	Halt();
+	return 0;
+}
