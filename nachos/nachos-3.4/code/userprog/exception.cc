@@ -331,42 +331,80 @@ void ExceptionHandler(ExceptionType which)
 			char c = (char)machine->ReadRegister(4);
 			gSynchConsole->Write(&c, 1);
 			IncreasePC();
-			printf("\n");
 			break;
 		}
-		case SC_ReadFloat: {
+		case SC_ReadFloat: 
+		{
 
 			int maxBytes = 255;
+
 			char buffer[256];
+
 			int numBytes = gSynchConsole->Read(buffer, maxBytes);
 
+
+			bool check = true;
+
 			//kiem tra la so thuc
+
 			for (int i = 0; i < numBytes; i++)
+
 			{
+
 			if (buffer[i] != '.' && (buffer[i] < '0' || buffer[i] > '9'))
+
 			{
+
 			printf("Khong phai so thuc!");
+
 			DEBUG('a', "\nERROR: Khong phai so thuc!");
-			machine->WriteRegister(2, 0);
-			IncreasePC();
+
+			machine->WriteRegister(2, 0.0);
+			check = false;
+
 			break;
+
 			}
+
 			}
-			float result = atof(buffer);
-			machine->WriteRegister(2, result);
+
+			float f;
+			sscanf(buffer, "%f", &f);
+
+			// Chuyển đổi số thực thành số nguyên
+			int f_int = *(int*)&f;
+
+
+			// Ghi giá trị số nguyên vào thanh ghi số 2
+			machine->WriteRegister(2, f_int);
+
+
 			IncreasePC();
 
 			break;
-		
-		}
+
+
+
+			}
+
 		case SC_PrintFloat:
+
 		{
-		   	float number = machine->ReadRegister(4);
-			char buffer[256];
-			sprintf(buffer, "%f", number);
-			gSynchConsole->Write(buffer, strlen(buffer));
-			IncreasePC();
-			break;
+		    	// Đọc giá trị từ thanh ghi số 4
+			int f_int = machine->ReadRegister(4);
+
+			// Chuyển đổi số nguyên thành số thực
+		    	float f = *(float*)&f_int;
+
+
+			// In số thực ra console
+			printf("%f\n", f);
+
+
+		    	IncreasePC();
+
+		    	break;
+
 		}
 
 		case SC_ReadInt:
@@ -433,7 +471,6 @@ void ExceptionHandler(ExceptionType which)
 				buffer[0] = '-';
 
 			gSynchConsole->Write(buffer, digitCount + 1); // in chuoi ra console
-			printf("\n");
 			IncreasePC();
 			break;
 		}	
@@ -461,7 +498,7 @@ void ExceptionHandler(ExceptionType which)
 			}
 			gSynchConsole->Write(buffer, length + 1);
 			IncreasePC();
-			printf("\n");
+			//printf("\n");
 			break;
 		}
 		case SC_Create:
