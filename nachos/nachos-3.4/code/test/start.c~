@@ -106,13 +106,13 @@ Write:
 	j	$31
 	.end Write
 
-	.globl Close
-	.ent	Close
-Close:
+	.globl CloseFile
+	.ent	CloseFile
+CloseFile:
 	addiu $2,$0,SC_Close
 	syscall
 	j	$31
-	.end Close
+	.end CloseFile
 
 	.globl Fork
 	.ent	Fork
@@ -129,6 +129,70 @@ Yield:
 	syscall
 	j	$31
 	.end Yield
+
+	.globl ReadChar
+	.ent ReadChar
+ReadChar:
+	addiu $2, $0, SC_ReadChar
+	syscall
+	j	$31
+	.end ReadChar
+
+	.globl PrintChar
+	.ent PrintChar
+PrintChar:
+	addiu $2, $0, SC_PrintChar
+	syscall
+	j	$31
+	.end PrintChar
+
+	.globl ReadFloat
+	.ent ReadFloat
+ReadFloat:
+	addiu $2, $0, SC_ReadFloat
+	syscall
+	j	$31
+	.end ReadFloat
+
+	.globl PrintFloat
+	.ent PrintFloat
+PrintFloat:
+	addiu $2, $0, SC_PrintFloat
+	syscall
+	j	$31
+	.end PrintFloat
+
+	.global ReadInt
+	.ent ReadInt
+ReadInt:
+	addiu $2, $0, SC_ReadInt
+	syscall
+	j	$31
+	.end ReadInt
+
+	.global PrintInt
+	.ent PrintInt
+PrintInt:
+	addiu $2, $0, SC_PrintInt
+	syscall
+	j	$31
+	.end PrintInt
+	
+	.globl ReadString
+	.ent ReadString
+ReadString:
+	addiu $2, $0, SC_ReadString
+	syscall
+	j	$31
+	.end ReadString
+
+	.globl PrintString
+	.ent PrintString
+PrintString:
+	addiu $2, $0, SC_PrintString
+	syscall
+	j	$31
+	.end PrintString
 
 /* dummy function to keep gcc happy */
         .globl  __main

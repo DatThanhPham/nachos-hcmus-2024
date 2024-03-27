@@ -1,0 +1,55 @@
+#include "syscall.h"
+
+void main()
+{
+    char filename[] = "mota.txt";
+    int fileID;
+
+    // Try opening file
+    fileID = Open(filename, 1); // 1: read-only mode
+
+    // If can't open file, show error notification
+    if (fileID == -1)
+    {
+        PrintString("\nFAILED: Can't open file ");
+        PrintString(filename);
+    }
+
+    // If open file successfully, try reading file
+    else
+    {
+        int fileLength = Seek(-1, fileID); // Get file length
+        Seek(0, fileID); // Reset file pointer to beginning of file
+        char *buffer = malloc(fileLength + 1);
+
+        PrintString("File length: ");
+        PrintInt(fileLength);
+        PrintChar('\n');
+        
+        if (Read(buffer, fileLength, fileID) == -1)
+        {
+            // If unable read file, show error notification
+            PrintString("\nFAILED: Can't read file ");
+            PrintString(filename);
+        }
+
+        // If able to read file's content, print it to console
+        else
+        {
+            buffer[fileLength] = '\0';
+            PrintString("\nSUCCESS: Content of file ");
+            PrintString(filename);
+            PrintString(":\n");
+            PrintString(buffer);
+        }
+
+        // Always remembers to close the opened file.
+        CloseFile(fileID);
+        free (buffer);
+    }
+
+    PrintChar('\n');
+
+    // Halt machine!
+    Halt();
+}

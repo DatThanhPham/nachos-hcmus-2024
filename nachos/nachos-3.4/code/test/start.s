@@ -106,13 +106,21 @@ Write:
 	j	$31
 	.end Write
 
-	.globl Close
-	.ent	Close
-Close:
+	.globl Seek
+	.ent	Seek
+Seek:
+	addiu $2,$0,SC_Seek
+	syscall
+	j	$31
+	.end Seek
+
+	.globl CloseFile
+	.ent	CloseFile
+CloseFile:
 	addiu $2,$0,SC_Close
 	syscall
 	j	$31
-	.end Close
+	.end CloseFile
 
 	.globl Fork
 	.ent	Fork
@@ -162,6 +170,38 @@ PrintChar:
 	j	$31
 	.end PrintChar
 
+	.globl ReadFloat
+	.ent ReadFloat
+ReadFloat:
+	addiu $2, $0, SC_ReadFloat
+	syscall
+	j	$31
+	.end ReadFloat
+
+	.globl PrintFloat
+	.ent PrintFloat
+PrintFloat:
+	addiu $2, $0, SC_PrintFloat
+	syscall
+	j	$31
+	.end PrintFloat
+
+	.global ReadInt
+	.ent ReadInt
+ReadInt:
+	addiu $2, $0, SC_ReadInt
+	syscall
+	j	$31
+	.end ReadInt
+
+	.global PrintInt
+	.ent PrintInt
+PrintInt:
+	addiu $2, $0, SC_PrintInt
+	syscall
+	j	$31
+	.end PrintInt
+	
 	.globl ReadString
 	.ent ReadString
 ReadString:
