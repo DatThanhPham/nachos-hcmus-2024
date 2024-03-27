@@ -1,0 +1,145 @@
+#include "syscall.h"
+
+int a[100];
+
+int string_length(const char *str) {
+    int length = 0;
+    while (*str != '\0') {
+        ++length;
+        ++str;
+    }
+    return length;
+}
+
+void intToString(int value, char* str) {
+    int i = 0;
+    int isNegative = 0;
+    int start, end;
+    char temp;
+
+    if (value == 0) {
+        str[i++] = '0';
+        str[i] = '\0';
+        return;
+    }
+
+    if (value < 0) {
+        isNegative = 1;
+        value = -value;
+    }
+
+    // Fill in the string from the end
+    while (value != 0) {
+        int rem = value % 10;
+        str[i++] = (rem > 9)? (rem-10) + 'a' : rem + '0';
+        value = value / 10;
+    }
+
+    if (isNegative) {
+        str[i++] = '-';
+    }
+
+    str[i] = '\0'; // Null-terminate string
+
+    // Reverse the string
+    start = 0;
+    end = i - 1;
+    while (start < end) {
+        temp = str[start];
+        str[start] = str[end];
+        str[end] = temp;
+        start++;
+        end--;
+    }
+}
+
+int partition(int arr[], int low, int high)
+{
+	int pivot = a[high];
+	int i = low - 1;
+	int j;
+	int temp;
+
+	for (j = low; j < high; j++)
+	{
+		if(arr[j]<pivot)
+		{
+			i++;
+			temp = arr[i];
+			arr[i] = arr[j];
+			arr[j] = temp;
+		}
+	}
+	temp = arr[i+1];
+	arr[i+1] = arr[high];
+	arr[high] = temp;
+  	return (i+1);
+}
+
+void quickSort(int arr[],int low,int high)
+{
+	if(low<high)
+	{
+
+		int pi=partition(arr,low,high);
+		quickSort(arr,low,pi-1);
+		quickSort(arr,pi+1,high);
+	}
+}
+
+int main() {
+	int n;
+	int i;
+	char* filename;
+	int fileID;
+	PrintString("Enter the length of array of integer: \n");
+	n = ReadInt();
+	PrintString("Enter all element of array: \n");
+	for (i = 0; i < n; i++)
+	{
+		a[i] = ReadInt();
+	}
+
+	quickSort(a, 0, n-1);
+	
+	PrintString("Array after sorting using quick sort: ");
+
+	for (i = 0; i < n; i++)
+	{
+		PrintInt(a[i]);
+		PrintChar(' ');
+	}
+	PrintChar('\n');
+
+	filename = "quicksort.txt";
+	fileID = Open(filename, 0);
+	
+	if (fileID == -1)
+	{
+		PrintString("\nFAILED: Can't open file ");
+		PrintString(filename);
+	}
+	
+	else
+	{
+		char buffer[256];
+		int len;
+		for (i = 0; i < n; i++) {
+		    intToString(a[i], buffer);
+		    len = string_length(buffer);
+		    // Write the string representation of the integer followed by a space or newline
+		    Write(buffer, len, fileID);
+		    Write(" ", 1, fileID); // Separate the integers by spaces
+		}
+		
+
+		// Always remember to close the opened file.
+		CloseFile(fileID);
+	}
+	
+	Halt();
+
+	return 0;
+	
+
+}

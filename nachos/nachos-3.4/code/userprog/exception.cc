@@ -331,7 +331,6 @@ void ExceptionHandler(ExceptionType which)
 			char c = (char)machine->ReadRegister(4);
 			gSynchConsole->Write(&c, 1);
 			IncreasePC();
-			printf("\n");
 			break;
 		}
 		case SC_ReadFloat: {
@@ -433,7 +432,6 @@ void ExceptionHandler(ExceptionType which)
 				buffer[0] = '-';
 
 			gSynchConsole->Write(buffer, digitCount + 1); // in chuoi ra console
-			printf("\n");
 			IncreasePC();
 			break;
 		}	
@@ -461,7 +459,7 @@ void ExceptionHandler(ExceptionType which)
 			}
 			gSynchConsole->Write(buffer, length + 1);
 			IncreasePC();
-			printf("\n");
+			//printf("\n");
 			break;
 		}
 		case SC_Create:
