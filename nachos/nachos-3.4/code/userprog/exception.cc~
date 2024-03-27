@@ -277,7 +277,6 @@ void ExceptionHandler(ExceptionType which)
 			interrupt->Halt();
 
 			break;
-
 		case SC_ReadChar:
 
 		{
@@ -699,6 +698,7 @@ void ExceptionHandler(ExceptionType which)
 
 			fileSystem->openfile[openf_id]->Seek(pos);
 			machine->WriteRegister(2, pos);
+			IncreasePC();
 			break;
 		}
 		}

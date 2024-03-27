@@ -77,3 +77,9 @@ stringtest.o: stringtest.c
 stringtest: stringtest.o start.o
 	$(LD) $(LDFLAGS) start.o stringtest.o -o stringtest.coff
 	../bin/coff2noff stringtest.coff stringtest
+
+help.o: help.c
+	$(CC) $(CFLAGS) -c help.c
+help: help.o start.o
+	$(LD) $(LDFLAGS) start.o help.o -o help.coff
+	../bin/coff2noff help.coff help

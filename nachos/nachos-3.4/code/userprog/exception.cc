@@ -277,40 +277,6 @@ void ExceptionHandler(ExceptionType which)
 			interrupt->Halt();
 
 			break;
-		case SC_ReadFloat:
-		{
-			int maxBytes = 255;
-			char* buffer = new char[256];
-			int numBytes = gSynchConsole->Read(buffer, maxBytes);
-
-			//kiem tra la so thuc
-			for (int i = 0; i < numBytes; i++)
-			{
-				if (buffer[i] != '.' && (buffer[i] < '0' || buffer[i] > '9'))
-				{
-					printf("Khong phai so thuc!");
-					DEBUG('a', "\nERROR: Khong phai so thuc!");
-					delete[] buffer;
-					machine->WriteRegister(2, 0);
-					IncreasePC();
-					break;
-				}
-			}
-			float result = atof(buffer);
-			machine->WriteRegister(2, result);
-			IncreasePC();
-			delete[] buffer;
-			break;
-		}
-		case SC_PrintFloat:
-		{
-			float number = machine->ReadRegister(4);
-			char buffer[256];
-			sprintf(buffer, "%f", number);
-			gSynchConsole->Write(buffer, strlen(buffer));
-			IncreasePC();
-			break;
-		}
 		case SC_ReadChar:
 
 		{
