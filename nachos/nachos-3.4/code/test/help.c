@@ -30,7 +30,9 @@ int main()
         else
         {
             buffer[fileLength] = '\0';
-            PrintString("\nSUCCESS: Content of file ", filename, ":");
+            PrintString("\nSUCCESS: Content of file");
+            PrintString(filename);
+            PrintString("\n");
             PrintString(buffer);
         }
         CloseFile(fileID); // Dong file
