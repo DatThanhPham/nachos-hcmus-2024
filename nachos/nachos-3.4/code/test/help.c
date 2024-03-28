@@ -4,11 +4,11 @@
 
 int main()
 {
-    char *filename = "mota.txt";
+    char *filename = "mota.txt"; // Ten mac dinh cua file
     int fileID;
 
-    fileID = Open(filename, 1);
-    if (fileID == -1)
+    fileID = Open(filename, 1); // Mo file voi quyen doc
+    if (fileID == -1) // Neu khong mo duoc file, in ra thong bao loi
     {
         PrintString("\nFAILED: Can't open file ");
         PrintString(filename);
@@ -16,26 +16,24 @@ int main()
     else
     {
         char buffer[MAX_BUFFER_LENGTH + 1];
-        int fileLength = Seek(-1, fileID); // Get file length
-        Seek(0, fileID); // Reset file pointer to beginning of file
+        int fileLength = Seek(-1, fileID); // Lay do dai cua file
+        Seek(0, fileID); // Reset file pointer ve dau file
         
         if (Read(buffer, fileLength, fileID) == -1)
         {
-            // If unable read file, show error notification
+            // Neu khong doc duoc noi dung file, in ra thong bao loi
             PrintString("\nFAILED: Can't read file ");
             PrintString(filename);
         }
 
-        // If able to read file's content, print it to console
+        // Neu doc duoc noi dung file, in noi dung file ra console
         else
         {
             buffer[fileLength] = '\0';
-            PrintString("\nSUCCESS: Content of file ");
-            PrintString(filename);
-            PrintString(":\n");
+            PrintString("\nSUCCESS: Content of file ", filename, ":");
             PrintString(buffer);
         }
-        CloseFile(fileID);
+        CloseFile(fileID); // Dong file
     }
     
     Halt();

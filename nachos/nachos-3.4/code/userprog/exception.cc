@@ -433,7 +433,7 @@ void ExceptionHandler(ExceptionType which)
 				{
 					printf("Khong phai so nguyen!");
 					DEBUG('a', "\nERROR: Khong phai so nguyen!");
-					machine->WriteRegister(2, 0);
+					machine->WriteRegister(2, 0); // ghi so 0 vao thanh ghi r2
 					delete[] buffer;
 					IncreasePC();
 					break;
@@ -441,7 +441,7 @@ void ExceptionHandler(ExceptionType which)
 			}
 
 			int number = atoi(buffer); // chuyen chuoi thanh so nguyen
-			machine->WriteRegister(2, number);
+			machine->WriteRegister(2, number); // ghi so nguyen vao thanh ghi r2
 			IncreasePC();
 			break;
 		}
@@ -469,7 +469,7 @@ void ExceptionHandler(ExceptionType which)
 			char* buffer = new char[digitCount + 1];
 			bool negative = false;
 			buffer[digitCount] = '\0'; // sentinel
-			if (number < 0)
+			if (number < 0) // truong hop so am
 			{
 				negative = true;
 				number *= -1;
