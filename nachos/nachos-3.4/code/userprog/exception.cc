@@ -489,27 +489,27 @@ void ExceptionHandler(ExceptionType which)
 		case SC_ReadString:
 		{
 
-			int virtAddr = machine->ReadRegister(4);
-			int length = machine->ReadRegister(5);
-			char *buffer = new char[length + 1];
-			gSynchConsole->Read(buffer, length);
-			System2User(virtAddr, length, buffer);
-			delete[] buffer;
-			IncreasePC();
+			int virtAddr = machine->ReadRegister(4); // Đọc địa chỉ ảo của chuỗi từ thanh ghi r4
+			int length = machine->ReadRegister(5); // Đọc độ dài chuỗi từ thanh ghi r5
+			char *buffer = new char[length + 1]; // Cấp phát bộ nhớ động cho chuỗi, tạo thêm một ký tự kết thúc chuỗi
+			gSynchConsole->Read(buffer, length); // Sử dụng console để đọc chuỗi từ bàn phím
+			System2User(virtAddr, length, buffer); // Copy chuỗi từ kernel space sang user space
+			delete[] buffer; // Giải phóng bộ nhớ
+			IncreasePC(); // tăng program counter
 			break;
 		}
 
 		case SC_PrintString:
 		{
-			int virtAddr = machine->ReadRegister(4);
-			char *buffer = User2System(virtAddr, 255);
-			int length = 0;
-			while (buffer[length] != '\0')
+			int virtAddr = machine->ReadRegister(4); // Đọc địa chỉ ảo của chuỗi từ thanh ghi r4
+			char *buffer = User2System(virtAddr, 255); // Copy chuỗi từ user space sang kernel space
+			int length = 0; // Độ dài của chuỗi
+			while (buffer[length] != '\0') // Nếu chưa kết thúc chuỗi thì tăng độ dài
 			{
 				length++;
 			}
-			gSynchConsole->Write(buffer, length + 1);
-			IncreasePC();
+			gSynchConsole->Write(buffer, length + 1); // In chuỗi ra console
+			IncreasePC(); // tăng program counter
 			//printf("\n");
 			break;
 		}
