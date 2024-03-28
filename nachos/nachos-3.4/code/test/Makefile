@@ -78,6 +78,25 @@ stringtest: stringtest.o start.o
 	$(LD) $(LDFLAGS) start.o stringtest.o -o stringtest.coff
 	../bin/coff2noff stringtest.coff stringtest
 
+
+create.o: create.c
+	$(CC) $(CFLAGS) -c create.c
+create: create.o start.o
+	$(LD) $(LDFLAGS) start.o create.o -o create.coff
+	../bin/coff2noff create.coff create
+
+openclose.o: openclose.c
+	$(CC) $(CFLAGS) -c openclose.c
+openclose: openclose.o start.o
+	$(LD) $(LDFLAGS) start.o openclose.o -o openclose.coff
+	../bin/coff2noff openclose.coff openclose
+
+readwrite.o: readwrite.c
+	$(CC) $(CFLAGS) -c readwrite.c
+readwrite: readwrite.o start.o
+	$(LD) $(LDFLAGS) start.o readwrite.o -o readwrite.coff
+	../bin/coff2noff readwrite.coff readwrite
+
 help.o: help.c
 	$(CC) $(CFLAGS) -c help.c
 help: help.o start.o

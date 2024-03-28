@@ -43,63 +43,93 @@
 				// implementation is available
 class FileSystem {
   public:
-    OpenFile** openfile;
-    int index;
 
-    FileSystem(bool format) {
-	openfile = new OpenFile*[10];
-	index = 0;
+    OpenFile** openfile; // Array of pointers to OpenFile objects
+    
+    int index; // Index to keep track of the number of open files
+
+
+    FileSystem(bool format) 
+    {
+	openfile = new OpenFile*[10]; // Allocate memory for 10 open files
+	index = 0; // Initialize index to 0
+
+	// Initialize each entry in the openfile array to NULL
 	for (int i = 0; i < 10; i++)
 	{
 		openfile[i] = NULL;
 	}    
-	this->Create("stdin", 0);
+
+	this->Create("stdin", 1);
 	this->Create("stdout", 0);
 	
-	OpenFile* temp = this->OPen("stdin", 0); //index = 1
+	// Open stdin and assign it to index 1
+	OpenFile* temp = this->Open("stdin", 0);
 	openfile[0] = temp;
 	openfile[0]->type = 0;
 	index = 1;
-	delete temp;
+	delete temp; // Delete the temporary OpenFile object
     }
    
+    // Destructor to release memory allocated for open files
     ~FileSystem()
     {
+	// Delete each open file object and release memory
 	for (int i = 0; i < 10; i++)
 	{
 		if (openfile[i] != NULL)
 			delete openfile[i];
 	}
+	// Delete the array of open file pointers
 	delete [] openfile;
     }
 
-    bool Create(char *name, int initialSize) { 
-	int fileDescriptor = OpenForWrite(name);
+    // Creates a new file with the specified name and initial size
+    // Returns true if successful, false otherwise
+    bool Create(char *name, int initialSize) 
+    { 
+        // Open the file for writing
+        int fileDescriptor = OpenForWrite(name);
 
-	if (fileDescriptor == -1) return FALSE;
-	Close(fileDescriptor); 
-	return TRUE; 
-	}
+        // Check if the file could be opened
+        if (fileDescriptor == -1) 
+		return FALSE;
 
-    OpenFile* Open(char *name) {
-	  int fileDescriptor = OpenForReadWrite(name, FALSE);
+        // Close the file
+        Close(fileDescriptor); 
 
-	  if (fileDescriptor == -1) return NULL;
-	  index++;
-	  return new OpenFile(fileDescriptor);
-      }
-    //overload ham open mo file 2 type khac nhau
-    OpenFile* Open(char* name, int type) 
-    {
-	int fileDescriptor = OpenForReadWrite(name, FALSE);
-	
-	if (fileDescriptor == -1)
-		return NULL;
-	index++;
-	return new OpenFile(fileDescriptor, type);
+        // Return true to indicate successful creation
+        return TRUE; 
     }
 
-    bool Remove(char *name) { return Unlink(name) == 0; }
+    OpenFile* Open(char *name) 
+    {
+        int fileDescriptor = OpenForReadWrite(name, FALSE); 
+        if (fileDescriptor == -1) return NULL;
+        index++;
+        return new OpenFile(fileDescriptor);
+    }
+    
+    // Overloaded Open method to open a file with a specified type
+    OpenFile* Open(char* name, int type) 
+    {
+        // Open the file for read-write operations
+        int fileDescriptor = OpenForReadWrite(name, FALSE);
+
+        // Check if the file could be opened
+        if (fileDescriptor == -1)
+            return NULL;
+
+        // Increment the index to keep track of open files
+        index++;
+
+        // Return a new OpenFile object with the file descriptor and type
+        return new OpenFile(fileDescriptor, type);
+    }
+
+    bool Remove(char *name) { 
+        return Unlink(name) == 0; 
+    }
 
 };
 
@@ -120,7 +150,7 @@ class FileSystem {
 					// Create a file (UNIX creat)
 
     OpenFile* Open(char *name); 	// Open a file (UNIX open)
-    OpenFile* Open(char *name, int type);
+    OpenFile* Open(char *name, int type); //Open a file with specified type
 
     bool Remove(char *name);  		// Delete a file (UNIX unlink)
 

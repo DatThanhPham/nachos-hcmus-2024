@@ -163,102 +163,106 @@ int System2User(int virtAddr, int len, char *buffer)
 	return i;
 }
 
-// Increase Program counter
-
+// Function to increment the program counter (PC) and update relevant registers
 void IncreasePC()
 
 {
-
+	// Read the current value of the program counter (PC)
 	int counter = machine->ReadRegister(PCReg);
-
+	
+	// Save the current PC value to the previous PC register (PrevPCReg)
 	machine->WriteRegister(PrevPCReg, counter);
-
+	
+	// Read the value of the next PC register (NextPCReg)
 	counter = machine->ReadRegister(NextPCReg);
-
+	
+	// Write the current PC value to the PC register	
 	machine->WriteRegister(PCReg, counter);
 
+	// Update the next PC register to point to the next instruction (PC + 4)
 	machine->WriteRegister(NextPCReg, counter + 4);
 }
 
 void ExceptionHandler(ExceptionType which)
 
 {
-
+	//Read type from register 2
 	int type = machine->ReadRegister(2);
 
 	switch (which)
 
 	{
-
+	// Handle the case when no exception occurs
 	case NoException:
 
 		return;
 
+	// Handle the case when a page fault exception occurs
 	case PageFaultException:
 
-		DEBUG('a', "\n No valid translation found");
+		DEBUG('a', "\n Translation not found");
 
-		printf("\n\n No valid translation found");
+    		printf("\n\n Translation not found");
 
 		interrupt->Halt();
 
 		break;
-
+	
+	// Handle the case when a read-only exception occurs
 	case ReadOnlyException:
+		DEBUG('a', "\n Write attempted to read-only page");
 
-		DEBUG('a', "\n Write attempted to page marked read-only");
+    		printf("\n\n Write attempted to read-only page");
 
-		printf("\n\n Write attempted to page marked read-only");
-
-		interrupt->Halt();
+    		interrupt->Halt();
 
 		break;
 
+	// Handle the case when a bus error exception occurs
 	case BusErrorException:
+		DEBUG('a', "\n Invalid physical address translation");
 
-		DEBUG('a', "\n Translation resulted invalid physical address");
-
-		printf("\n\n Translation resulted invalid physical address");
+    		printf("\n\n Invalid physical address translation");
 
 		interrupt->Halt();
 
 		break;
 
+	// Handle the case when an address error exception occurs
 	case AddressErrorException:
+		DEBUG('a', "\n Unaligned or out-of-bounds memory access");
 
-		DEBUG('a', "\n Unaligned reference or one that was beyond the end of the address space");
-
-		printf("\n\n Unaligned reference or one that was beyond the end of the address space");
+    		printf("\n\n Unaligned or out-of-bounds memory access");
 
 		interrupt->Halt();
 
 		break;
 
+	// Handle the case when an overflow exception occurs
 	case OverflowException:
+		DEBUG('a', "\n Integer overflow in arithmetic operation");
 
-		DEBUG('a', "\nInteger overflow in add or sub.");
-
-		printf("\n\n Integer overflow in add or sub.");
+		printf("\n\n Integer overflow in arithmetic operation");
 
 		interrupt->Halt();
 
 		break;
 
+	// Handle the case when an illegal instruction exception occurs
 	case IllegalInstrException:
+		DEBUG('a', "\n Unsupported or reserved instruction");
 
-		DEBUG('a', "\n Unimplemented or reserved instr.");
-
-		printf("\n\n Unimplemented or reserved instr.");
+		printf("\n\n Unsupported or reserved instruction");
 
 		interrupt->Halt();
 
 		break;
 
+	// Handle the case when an unknown exception type occurs
 	case NumExceptionTypes:
+		DEBUG('a', "\n Number of exception types exceeded");
 
-		DEBUG('a', "\n Number exception types");
-
-		printf("\n\n Number exception types");
+		printf("\n\n Number of exception types exceeded");
 
 		interrupt->Halt();
 
@@ -280,7 +284,6 @@ void ExceptionHandler(ExceptionType which)
 		case SC_ReadChar:
 
 		{
-
 			int maxBytes = 255;
 
 			char *buffer = new char[255];
@@ -290,47 +293,59 @@ void ExceptionHandler(ExceptionType which)
 			if (numBytes > 1)
 
 			{
+				// Print error message for exceeding maximum allowed characters
+				printf("Maximum 1 character allowed for input");
 
-				printf("Nhap toi da 1 ki tu!");
-
-				DEBUG('a', "\nERROR: Chi nhap toi da 1 ki tu!");
-
+				// Log error message
+				DEBUG('a', "\nERROR: Maximum 1 character allowed for input!");
+			
+				// Set return value to indicate error
 				machine->WriteRegister(2, 0);
 			}
 
-			else if (numBytes == 0) // rong
-
-			{
-
-				printf("Ki tu rong!");
-
-				DEBUG('a', "\nERROR: Ki tu rong!");
-
+			else if (numBytes == 0) //empty
+			{	
+				
+				// Print error message for empty input
+				printf("Empty character!");
+	
+			        // Log error message
+				DEBUG('a', "\nERROR: Empty character!");
+	
+				// Set return value to indicate error
 				machine->WriteRegister(2, 0);
 			}
 
 			else
 
 			{
-
+				// Read character from buffer
 				char c = buffer[0];
-
+		
+			        // Write character to register 2
 				machine->WriteRegister(2, c);
 			}
-
+	
+			// Free dynamically allocated buffer memory
 			delete buffer;
-
+		
+			// Increment program counter
 			IncreasePC();
 
 			break;
 		}
 
 		case SC_PrintChar:
-
 		{
+			// Read character from register 4
 			char c = (char)machine->ReadRegister(4);
+			
+			// Write character to console
 			gSynchConsole->Write(&c, 1);
+			
+			// Increment program counter
 			IncreasePC();
+
 			break;
 		}
 		case SC_ReadFloat: 
@@ -351,20 +366,20 @@ void ExceptionHandler(ExceptionType which)
 
 			{
 
-			if (buffer[i] != '.' && (buffer[i] < '0' || buffer[i] > '9'))
+				if (buffer[i] != '.' && (buffer[i] < '0' || buffer[i] > '9'))
 
-			{
+				{
 
-			printf("Khong phai so thuc!");
+					printf("Khong phai so thuc!");
 
-			DEBUG('a', "\nERROR: Khong phai so thuc!");
+					DEBUG('a', "\nERROR: Khong phai so thuc!");
 
-			machine->WriteRegister(2, 0.0);
-			check = false;
+					machine->WriteRegister(2, 0.0);
+					check = false;
 
-			break;
+					break;
 
-			}
+				}
 
 			}
 
@@ -382,10 +397,7 @@ void ExceptionHandler(ExceptionType which)
 			IncreasePC();
 
 			break;
-
-
-
-			}
+		}
 
 		case SC_PrintFloat:
 
@@ -503,241 +515,387 @@ void ExceptionHandler(ExceptionType which)
 		}
 		case SC_Create:
 		{
-			int virtAddr;
+			// Read the virtual address of the file name from register 4
+			int virtualAddress;
+
 			char* fileName;
 			
-			virtAddr = machine->ReadRegister(4);
+			virtualAddress = machine->ReadRegister(4);
 			
-			fileName = User2System(virtAddr, 32 + 1);
+			// Convert virtual address to system address and retrieve the file name
+			fileName = User2System(virtualAddress, 32 + 1);
+
+			// Check if the file name is empty
 			if (strlen(fileName) == 0) 
 			{
 				printf("\n File name is not valid");
+	
+				// Set return value to -1
 				machine->WriteRegister(2, -1);
+
+				// Increment program counter
 				IncreasePC();
+
 				break;
 			}
+			// Check if system has enough memory
 			if (fileName == NULL)
 			{
 				printf("\n Not enough memory in system");
+				
+				// Set return value to -1
 				machine->WriteRegister(2,-1);
+
 				delete fileName;
+			
+			        // Increment program counter
 				IncreasePC();
+
 				break;
 			}
+	
+			// Check if file creation is successful
 			if (!fileSystem->Create(fileName, 0)) 
 			{
-				printf("\n Khong the tao file '%s'", fileName);
+				printf("\n Cannot create file'%s'", fileName);
+
+				// Set return value to -1		
 				machine->WriteRegister(2,-1);
+
 				delete fileName;
+
+				// Increment program counter
 				IncreasePC();
+
 				break;
 			}
-			//Khi tao file thanh cong
+
+			// File creation successful, set return value to 0
 			machine->WriteRegister(2,0);
+
 			delete fileName;
+			
+			// Increment program counter
 			IncreasePC();
+
 			break;
 		}
 		case SC_Open:
 		{
-			int bufAddr = machine->ReadRegister(4);
+
+			// Read the virtual address of the file name from register 4
+			int bufferAddress = machine->ReadRegister(4);
+			
+			// Read the type of file from register 5
 			int type = machine->ReadRegister(5);
-			char* buf;
+
+			char* buffer;
 		
-			//10 files opened
+			// Check if maximum number of files opened (10) has been reached
 			if (fileSystem->index > 10)
-			{
+			{	
+				// Set return value to -1 indicating failure
 				machine->WriteRegister(2,-1);
-				delete [] buf;
+
+				delete [] buffer;
+
 				break;
 			}
-			//open stdin or stdout => number of openfiles dont increase
-			buf = User2System(bufAddr, 256);
-			if (strcmp(buf, "stdin") == 0)
+			// Convert virtual address to system address and retrieve the file name
+			buffer = User2System(bufferAddress, 256);
+
+			// Check if file is stdin or stdout
+			if (strcmp(buffer, "stdin") == 0)
 			{
+
 				printf("Stdin mode\n");
-				machine->WriteRegister(2,0);
-				delete [] buf;
+
+				// Set return value to 1 indicating success
+				machine->WriteRegister(2,1);
+
+				delete [] buffer;
+
 				break;
 			}
-			if (strcmp(buf, "stdout") == 0)
+		
+			if (strcmp(buffer, "stdout") == 0)
 			{
 				printf("Stdout mode\n");
+
+				// Set return value to 0 indicating success
 				machine->WriteRegister(2,0);
-				delete [] buf;
+
+				delete [] buffer;
+
 				break;
 			}
-			//if opening file succeed
-			if ((fileSystem->openfile[fileSystem->index] = fileSystem->Open(buf, type)) != NULL)
+			// Attempt to open the file
+			if ((fileSystem->openfile[fileSystem->index] = fileSystem->Open(buffer, type)) != NULL)
 			{
-				printf("\n Open file success '%s'", buf);
+				printf("\n Open file success '%s'", buffer);
+			
+				// Set return value to index of the opened file
 				machine->WriteRegister(2, fileSystem->index - 1);
 			}
 			else
 			{
-				printf("Cannot open file '%s'", buf);
+				printf("Cannot open file '%s'", buffer);
+				
+				// Set return value to -1 indicating failure
 				machine->WriteRegister(2, -1);
 			}
-			delete [] buf;
+			delete [] buffer;
+			
+			// Increment program counter
 			IncreasePC();
+
 			break;
 		}
 
 		case SC_Close:
 		{
-			int no = machine->ReadRegister(4);
-			int i = fileSystem->index;
+			// Read the file descriptor from register 4
+			int fileDescriptor = machine->ReadRegister(4);
 
-			if (i < no)
+			int numOpenFiles = fileSystem->index;
+
+			// Check if file descriptor is valid
+			if (numOpenFiles < fileDescriptor)
 			{
 				printf("Close file failed \n");
+
+				// Set return value to -1 indicating failure
 				machine->WriteRegister(2, -1);
+
 				break;
 			}
-			fileSystem->openfile[no] = NULL;
-			delete fileSystem->openfile[no];
-			machine->WriteRegister(2,0);
+
+			// Close the file
+			fileSystem->openfile[fileDescriptor] = NULL;
+
+			delete fileSystem->openfile[fileDescriptor];
+
+			// Set return value to 0 indicating success
+			machine->WriteRegister(2, 0);
+
 			printf("Close file success \n");
+
+			// Increment program counter
 			IncreasePC();
+
 			break;
+
 		}
+
 		case SC_Read:
 		{
-			int virtAddr = machine->ReadRegister(4);
-			int charcount = machine->ReadRegister(5);
-			int openf_id = machine->ReadRegister(6);
-			int i = fileSystem->index;
-			
-			if (openf_id > i || openf_id < 0 || openf_id == 1) // go wrong <-- if try open `out of domain` fileSystem (10 openfile) 
-			{						 	// or try to read stdout
-				printf("Try to open invalib file");
+			// Read the virtual address of the buffer from register 4
+			int bufferAddr = machine->ReadRegister(4);
+
+			// Read the number of characters to read from register 5
+			int charCount = machine->ReadRegister(5);
+
+			// Read the file descriptor from register 6
+			int fileId = machine->ReadRegister(6);
+
+			// Get the number of open files
+			int numOpenFiles = fileSystem->index;
+
+			// Check if file descriptor is valid
+			if (fileId > numOpenFiles || fileId < 0 || fileId == 1) // Invalid file descriptor or attempting to read from stdout
+			{
+				printf("Try to open invalid file");
 				machine->WriteRegister(2, -1);
 				break;
 			}
 
-			if (fileSystem->openfile[openf_id] == NULL)
+			// Check if the file is open
+			if (fileSystem->openfile[fileId] == NULL)
 			{
 				machine->WriteRegister(2, -1);
 				break;
 			}
 
-			char *buf = User2System(virtAddr, charcount);
-			
-			if (openf_id == 0) // read from stdin
-			{
-				int sz = gSynchConsole->Read(buf, charcount);
-				System2User(virtAddr, sz, buf);
-				machine->WriteRegister(2, sz);
+			// Allocate buffer in kernel space
+			char *kernelBuffer = User2System(bufferAddr, charCount);
 
-				delete[] buf;
+			if (fileId == 1) // Read from stdin
+			{
+				// Read from console
+				int bytesRead = gSynchConsole->Read(kernelBuffer, charCount);
+
+				// Copy data from kernel to user space
+				System2User(bufferAddr, bytesRead, kernelBuffer);
+
+				// Set the number of bytes read as return value
+				machine->WriteRegister(2, bytesRead);
+
+				delete[] kernelBuffer;
 				break;
 			}
-			
-			int before = fileSystem->openfile[openf_id]->GetCurrentPos();
-			if ((fileSystem->openfile[openf_id]->Read(buf, charcount)) > 0)
+
+			// Record current file position
+			int beforePos = fileSystem->openfile[fileId]->GetCurrentPos();
+
+			// Read from file
+			int bytesRead = fileSystem->openfile[fileId]->Read(kernelBuffer, charCount);
+
+			if (bytesRead > 0)
 			{
-				// copy data from kernel to user space
-				int after = fileSystem->openfile[openf_id]->GetCurrentPos();
-				System2User(virtAddr, charcount, buf);
-				machine->WriteRegister(2, after - before + 1);	// after & before just used for returning
-			} else {
+				// Record new file position
+				int afterPos = fileSystem->openfile[fileId]->GetCurrentPos();
+
+				// Copy data from kernel to user space
+				System2User(bufferAddr, charCount, kernelBuffer);
+
+				// Set the number of bytes read as return value
+				machine->WriteRegister(2, afterPos - beforePos + 1);
+			}
+			else
+			{
+				// Set return value to -1 indicating failure
 				machine->WriteRegister(2, -1);
 			}
-			delete[] buf;
+
+			delete[] kernelBuffer;
+
+			// Increment program counter
 			IncreasePC();
+
 			break;
 		}
+
 		case SC_Write: 
 		{
-			int virtAddr = machine->ReadRegister(4);
-			int charcount = machine->ReadRegister(5);
-			int openf_id = machine->ReadRegister(6);
-			int i = fileSystem->index;
+			// Read the virtual address of the buffer from register 4
+			int bufferAddr = machine->ReadRegister(4);
 
+			// Read the number of characters to write from register 5
+			int charCount = machine->ReadRegister(5);
 
-			if (openf_id > i || openf_id < 0 || openf_id == 0) // `out of domain` filesys + try to write to stdin 
+			// Read the file descriptor from register 6
+			int fileId = machine->ReadRegister(6);
+
+			// Get the number of open files
+			int numOpenFiles = fileSystem->index;
+
+			// Check if file descriptor is valid
+			if (fileId > numOpenFiles || fileId < 0 || fileId == 0) // Invalid file descriptor or attempting to write to stdin 
 			{
 				machine->WriteRegister(2, -1);
+
 				IncreasePC();
-				break;
-			}
-			
-			if (fileSystem->openfile[openf_id] == NULL)
-			{
-				machine->WriteRegister(2, -1);
+
 				break;
 			}
 
-			// read-only file	
-			if (fileSystem->openfile[openf_id]->type == 1)
+			// Check if the file is open
+			if (fileSystem->openfile[fileId] == NULL)
+			{
+				machine->WriteRegister(2, -1);
+
+				break;
+			}
+
+			// Check if file is read-only
+			if (fileSystem->openfile[fileId]->type == 1)
 			{
 				printf("Try to modify read-only file");
+
 				machine->WriteRegister(2, -1);
+
 				IncreasePC();
+
 				break;
 			}
 
-			// write to console
-			char *buf = User2System(virtAddr, charcount);
-			if (openf_id == 1)
+			// Write to console
+			char *kernelBuffer = User2System(bufferAddr, charCount);
+
+			if (fileId == 0) // Write to stdout
 			{
 				int i = 0;
-				while (buf[i] != '\0' && buf[i] != '\n')
+
+				while (kernelBuffer[i] != '\0' && kernelBuffer[i] != '\n')
 				{
-					gSynchConsole->Write(buf + i, 1);
-					i++;
+				    gSynchConsole->Write(kernelBuffer + i, 1);
+
+				    i++;
 				}
-				buf[i] = '\n';
-				gSynchConsole->Write(buf + i, 1); // write last character
+				kernelBuffer[i] = '\n';
+
+				gSynchConsole->Write(kernelBuffer + i, 1); // Write last character
 
 				machine->WriteRegister(2, i - 1);
-				delete[] buf;
+
+				delete[] kernelBuffer;
+
 				IncreasePC();
+
 				break;
 			}
 
+			// Write into file
+			int beforePos = fileSystem->openfile[fileId]->GetCurrentPos();
 
-			// write into file
-			int before = fileSystem->openfile[openf_id]->GetCurrentPos();
-			if ((fileSystem->openfile[openf_id]->Write(buf, charcount)) != 0)
+			int bytesWritten = fileSystem->openfile[fileId]->Write(kernelBuffer, charCount);
+			if (bytesWritten != 0)
 			{
-				int after = fileSystem->openfile[openf_id]->GetCurrentPos();
-				System2User(virtAddr, after - before, buf);
-				machine->WriteRegister(2, after - before + 1);
-				delete[] buf;
-				IncreasePC();
-				break;
-			}
+				int afterPos = fileSystem->openfile[fileId]->GetCurrentPos();
 
+				System2User(bufferAddr, afterPos - beforePos, kernelBuffer);
+
+				machine->WriteRegister(2, afterPos - beforePos + 1);
+
+				delete[] kernelBuffer;
+
+				IncreasePC();
+
+				break;
+			}		
 		}
-		case SC_Seek:
+
+		case SC_Seek: 
 		{
-			int pos = machine->ReadRegister(4);
-			int openf_id = machine->ReadRegister(5);
+			// Read the position to seek to from register 4
+			int position = machine->ReadRegister(4);
 
-			// seek into files: stdin, stdout, `out of domain` fileSystem
-			if (openf_id < 1 || openf_id > fileSystem->index || fileSystem->openfile[openf_id] == NULL)
+			// Read the file descriptor from register 5
+			int fileId = machine->ReadRegister(5);
+
+			// Check if the file descriptor is valid
+			if (fileId < 1 || fileId > fileSystem->index || fileSystem->openfile[fileId] == NULL)
 			{
 				machine->WriteRegister(2, -1);
 				break;
 			}
 
-			int len = fileSystem->openfile[openf_id]->Length();	// file size
+			// Get the length of the file
+			int fileLength = fileSystem->openfile[fileId]->Length();
 
-			if (pos > len)	// try to move file ptr to pos, pos > len --> wrong
+			// Check if the position is valid
+			if (position > fileLength)
 			{
-				machine->WriteRegister(2, -1);
-				break;
+			machine->WriteRegister(2, -1);
+			break;
 			}
 
-			if (pos == -1)	// move file ptr to the begining of file
-				pos = len;
+			// Move the file pointer to the specified position
+			if (position == -1) // Move file pointer to the beginning of file
+			{
+			position = fileLength;
+			}
 
-			fileSystem->openfile[openf_id]->Seek(pos);
-			machine->WriteRegister(2, pos);
+			fileSystem->openfile[fileId]->Seek(position);
+
+			// Write the new position to register 2
+			machine->WriteRegister(2, position);
+
 			IncreasePC();
+
 			break;
 		}
+
 		}
 	}
 }

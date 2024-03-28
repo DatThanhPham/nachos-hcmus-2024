@@ -30,6 +30,7 @@
 #define SC_Fork		9
 #define SC_Yield	10
 #define SC_Seek		11
+
 //read char and print char
 #define SC_ReadChar	13
 #define SC_PrintChar	14

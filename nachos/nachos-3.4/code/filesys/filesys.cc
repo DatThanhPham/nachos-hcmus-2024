@@ -252,7 +252,7 @@ FileSystem::Open(char *name)
     if (sector >= 0) 		
 	openFile = new OpenFile(sector);	// name was found in directory 
     delete directory;
-    index++;
+    index++;					//Increment the index of number of files
     return openfile[index-1];				// return NULL if not found
 }
 

@@ -266,7 +266,7 @@ OpenFile* FileSystem::Open(char *name, int type)
 	directory->FetchFrom(directoryFile);
 	sector = directory->Find(name);
 	if (sector >= 0)
-		openfile[index] = new OpenFile(sector, tye);	// name was found in directory 
+		openfile[index] = new OpenFile(sector, type);	// name was found in directory 
 	delete directory;
 	index++;
 	return openfile[index-1];				// return NULL if not found

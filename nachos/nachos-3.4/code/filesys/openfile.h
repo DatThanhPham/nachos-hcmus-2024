@@ -32,7 +32,7 @@ class OpenFile {
     int seekPosition;
     
     OpenFile(int f) { file = f; currentOffset = 0; }	// open the file
-    OpenFile(int f, int t) {file = f; currentOffset = 0; type = t;}
+    OpenFile(int f, int t) {file = f; currentOffset = 0; type = t;} //open the file with type
     ~OpenFile() { Close(file); }			// close the file
 
     int ReadAt(char *into, int numBytes, int position) { 
@@ -54,21 +54,32 @@ class OpenFile {
 		currentOffset += numWritten;
 		return numWritten;
 		}
-
-    //int Length() { Lseek(file, 0, 2); return Tell(file); }
+    // Returns the length of the file.
     int Length()     
     {
 	int len;
+
+	// Move the file pointer to the end of the file to get its length
 	Lseek(file, 0, 2);
+	
+	// Get the current position of the file pointer, which corresponds to the length of the file
 	len = Tell(file);
+	
+	// Move the file pointer back to its original position
 	Lseek(file, currentOffset, 0);
+
 	return len;
     }
     
+    // Sets the file pointer to the specified position and updates the current offset.
     int Seek(int pos) 
-    {
+    {	
+	// Move the file pointer to the specified position
 	Lseek(file, pos, 0);
+
+	// Update the current offset to the new position
 	currentOffset = Tell(file);
+
 	return currentOffset;
     }
 
@@ -88,7 +99,7 @@ class OpenFile {
 
     OpenFile(int sector);		// Open a file whose header is located
 					// at "sector" on the disk
-    OpenFile(int sector, int type);
+    OpenFile(int sector, int type);	// Open a file with type 
 
     ~OpenFile();			// Close the file
 

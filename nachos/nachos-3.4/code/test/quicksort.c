@@ -89,7 +89,7 @@ void quickSort(int arr[],int low,int high)
 
 int main() {
 	int n;
-	int i;
+	int i, j;
 	char* filename;
 	int fileID;
 	PrintString("Enter the length of array of integer: \n");
@@ -101,19 +101,10 @@ int main() {
 	}
 
 	quickSort(a, 0, n-1);
-	
-	PrintString("Array after sorting using quick sort: ");
-
-	for (i = 0; i < n; i++)
-	{
-		PrintInt(a[i]);
-		PrintChar(' ');
-	}
-	PrintChar('\n');
 
 	filename = "quicksort.txt";
 	fileID = Open(filename, 0);
-	
+
 	if (fileID == -1)
 	{
 		PrintString("\nFAILED: Can't open file ");
@@ -131,11 +122,12 @@ int main() {
 		    Write(buffer, len, fileID);
 		    Write(" ", 1, fileID); // Separate the integers by spaces
 		}
-		
-
 		// Always remember to close the opened file.
 		CloseFile(fileID);
 	}
+	
+	PrintString("The result is in file quicksort.txt");
+	PrintChar('\n');
 	
 	Halt();
 
