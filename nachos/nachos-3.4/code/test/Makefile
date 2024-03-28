@@ -35,7 +35,7 @@ CPP = gcc -E
 INCDIR =-I../userprog -I../threads
 CFLAGS = -G 0 -c $(INCDIR)
 
-all: halt shell matmult sort test stringtest create openclose readwrite help float quicksort
+all: halt shell matmult sort test stringtest create openclose readwrite help float quicksort ascii
 
 start.o: start.s ../userprog/syscall.h
 	$(CPP) $(CPPFLAGS) start.c > strt.s
@@ -114,3 +114,9 @@ float.o: float.c
 float: float.o start.o
 	$(LD) $(LDFLAGS) start.o float.o -o float.coff
 	../bin/coff2noff float.coff float
+
+ascii.o: ascii.c
+	$(CC) $(CFLAGS) -c ascii.c
+ascii: ascii.o start.o
+	$(LD) $(LDFLAGS) start.o ascii.o -o ascii.coff
+	../bin/coff2noff ascii.coff ascii
