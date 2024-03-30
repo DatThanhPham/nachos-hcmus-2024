@@ -31,6 +31,8 @@ void intToStr(int n, char *s) {
     s[len] = '\0';
 }
 
+
+
 int main(){
     int i;
     char c;

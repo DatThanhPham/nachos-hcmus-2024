@@ -1,0 +1,4 @@
+# String test
+- Chức năng: Sử dụng syscall ReadString để đọc 1 chuỗi độ dài tối đa 5 vào buffer. Sau đó dùng syscall PrintString để in chuỗi trong buffer ra console. Cuối cùng, dùng syscall Halt để tắt NachOS.
+# ASCII
+- Chức năng: Sử dụng syscall Open để mở file "ascii.txt" ở chế độ viết. Sau đó, sử dụng syscall Write để viết các chuỗi: "ASCII code: ", số thứ thự của mã ASCII được chuyển từ số nguyên sang chuỗi, " Character: ", và ký tự được chuyển từ kiểu char sang char*, cuối cùng là ký tự xuống dòng. Điều này sẽ viết tất cả các ký tự ASCII vào file ascii.txt. Sau đó, làm tương tự những điều trên nhưng thay vì viết vào file thì ta in ra console. Cuối cùng, thông báo thành công và dừng NachOS.
