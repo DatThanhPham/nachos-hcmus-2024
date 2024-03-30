@@ -103,6 +103,7 @@ int main() {
 	quickSort(a, 0, n-1);
 
 	filename = "quicksort.txt";
+	Create(filename);
 	fileID = Open(filename, 0);
 
 	if (fileID == -1)
