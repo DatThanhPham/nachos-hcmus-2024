@@ -6,7 +6,6 @@ int str_length(char *s) {
         i++;
     }
     return i;
-
 }
 
 void intToStr(int n, char *s) {
@@ -30,8 +29,9 @@ void intToStr(int n, char *s) {
         s[j] = temp[len - j - 1];
     }
     s[len] = '\0';
-
 }
+
+
 
 int main(){
     int i;
@@ -51,7 +51,7 @@ int main(){
             Write("ASCII code: ", 12, fileID);
             Write(buffer, str_length(buffer), fileID);
             Write(" Character: ", 11, fileID);
-            Write((char)&c, 1, fileID);
+            Write(&c, 1, fileID);
             Write("\n", 1, fileID);
         }
         CloseFile(fileID);

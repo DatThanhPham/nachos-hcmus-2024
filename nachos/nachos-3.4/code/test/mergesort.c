@@ -1,62 +1,5 @@
 #include "syscall.h"
 
-int getFileLength(int fileID)
-{
-    int value = Seek(-1, fileID);
-    Seek(0, fileID);
-    return value;
-}
-int string_length(const char *str) {
-    int length = 0;
-    while (*str != '\0') {
-        ++length;
-        ++str;
-    }
-    return length;
-}
-
-void intToString(int value, char* str) {
-	int i = 0;
-	int isNegative = 0;
-	int start, end;
-	char temp;
-
-	if (value == 0) {
-	str[i++] = '0';
-	str[i] = '\0';
-	return;
-	}
-
-	if (value < 0) {
-	isNegative = 1;
-	value = -value;
-	}
-
-	// Fill in the string from the end
-	while (value != 0) {
-	int rem = value % 10;
-	str[i++] = (rem > 9)? (rem-10) + 'a' : rem + '0';
-	value = value / 10;
-	}
-
-	if (isNegative) {
-	str[i++] = '-';
-	}
-
-	str[i] = '\0'; // Null-terminate string
-
-	// Reverse the string
-	start = 0;
-	end = i - 1;
-	while (start < end) {
-	temp = str[start];
-	str[start] = str[end];
-	str[end] = temp;
-	start++;
-	end--;
-	}
-}
-
 void merge(int a[],  int left, int mid, int right){
 	int L[50];
 	int R[50];
@@ -96,26 +39,25 @@ void mergeSort(int a[], int left, int right){
 	}
 }
 
-
 int main() {
-	int a[100];
+	int a[50];
 	int n;
 	int i, j;
 	char* filename;
 	int fileID;
 	int len;
-	PrintString("Enter the length of array of integer: \n");
+	float f;
+	PrintString("Enter the length of array of float: \n");
 	n = ReadInt();
 	PrintString("Enter all element of array: \n");
 	for (i = 0; i < n; i++)
 	{
-		a[i] = ReadInt();
+		a[i] = ReadFloat();
 	}
-
+	
 	mergeSort(a, 0, n-1);
 
 	filename = "mergesort.txt";
-	Create(filename);
 	fileID = Open(filename, 0);
 
 	if (fileID == -1)
@@ -126,12 +68,8 @@ int main() {
 	
 	else
 	{
-		char buffer[50];
 		for (i = 0; i < n; i++) {
-		    intToString(a[i], buffer);
-		    len = string_length(buffer);
-		    // Write the string representation of the integer followed by a space or newline
-		    Write(buffer, len, fileID);
+		    WriteFloat(a[i], fileID);
 		    Write(" ", 1, fileID); // Separate the integers by spaces
 		}
 		// Always remember to close the opened file.

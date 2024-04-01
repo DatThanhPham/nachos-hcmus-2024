@@ -47,6 +47,8 @@
 #define SC_ReadFloat	19
 #define SC_PrintFloat	20
 
+#define SC_WriteFloat 21
+
 #ifndef IN_ASM
 
 /* The system call interface.  These are the operations the Nachos

@@ -201,6 +201,13 @@ PrintString:
 	syscall
 	j	$31
 	.end PrintString
+	.globl WriteFloat
+	.ent WriteFloat
+WriteFloat:
+	addiu $2, $0, SC_WriteFloat
+	syscall
+	j	$31
+	.end WriteFloat
 
 /* dummy function to keep gcc happy */
         .globl  __main

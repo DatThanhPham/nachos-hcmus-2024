@@ -407,10 +407,16 @@ void ExceptionHandler(ExceptionType which)
 
 			// Chuyển đổi số nguyên thành số thực
 		    	float f = *(float*)&f_int;
+			int count = 0;
+			char buffer[256];
 
 
 			// In số thực ra console
-			printf("%f\n", f);
+			sprintf(buffer, "%f", f);
+			while(buffer[count] != '\0'){
+				count ++;	
+			}	
+			gSynchConsole->Write(buffer, count + 1);
 
 
 		    	IncreasePC();
@@ -854,7 +860,95 @@ void ExceptionHandler(ExceptionType which)
 				break;
 			}		
 		}
+		case SC_WriteFloat: 
 
+		{
+			int charCount = 0;
+			char buffer[256];
+			// Đọc giá trị từ thanh ghi số 4
+			int f_int = machine->ReadRegister(4);
+
+			// Chuyển đổi số nguyên thành số thực
+		    	float f = *(float*)&f_int;
+			sprintf(buffer, "%f", f);
+			while(buffer[charCount] != '\0'){
+				charCount ++;	
+			}
+
+			// Read the file descriptor from register 
+			int fileId = machine->ReadRegister(5);
+
+			// Get the number of open files
+			int numOpenFiles = fileSystem->index;
+
+			// Check if file descriptor is valid
+			if (fileId > numOpenFiles || fileId < 0 || fileId == 0) // Invalid file descriptor or attempting to write to stdin 
+			{
+				machine->WriteRegister(2, -1);
+
+				IncreasePC();
+
+				break;
+			}
+
+			// Check if the file is open
+			if (fileSystem->openfile[fileId] == NULL)
+			{
+				machine->WriteRegister(2, -1);
+
+				break;
+			}
+
+			// Check if file is read-only
+			if (fileSystem->openfile[fileId]->type == 1)
+			{
+				printf("Try to modify read-only file");
+
+				machine->WriteRegister(2, -1);
+
+				IncreasePC();
+
+				break;
+			}
+
+
+
+			if (fileId == 0) // Write to stdout
+			{
+				int i = 0;
+
+				while (buffer[i] != '\0' && buffer[i] != '\n')
+				{
+				    gSynchConsole->Write(buffer + i, 1);
+
+				    i++;
+				}
+				buffer[i] = '\n';
+
+				gSynchConsole->Write(buffer + i, 1); // Write last character
+
+				machine->WriteRegister(2, i - 1);
+
+				IncreasePC();
+
+				break;
+			}
+
+			// Write into file
+			int beforePos = fileSystem->openfile[fileId]->GetCurrentPos();
+
+			int bytesWritten = fileSystem->openfile[fileId]->Write(buffer, charCount);
+			if (bytesWritten != 0)
+			{
+				int afterPos = fileSystem->openfile[fileId]->GetCurrentPos();
+
+				machine->WriteRegister(2, afterPos - beforePos + 1);
+
+				IncreasePC();
+
+				break;
+			}		
+		}
 		case SC_Seek: 
 		{
 			// Read the position to seek to from register 4
