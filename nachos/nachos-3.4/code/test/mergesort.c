@@ -1,6 +1,6 @@
 #include "syscall.h"
 
-void merge(int a[],  int left, int mid, int right){
+void merge(int a[], int left, int mid, int right){
 	int L[50];
 	int R[50];
 	int nL, nR;
@@ -40,13 +40,9 @@ void mergeSort(int a[], int left, int right){
 }
 
 int main() {
-	int a[50];
-	int n;
-	int i, j;
+	int a[50], n, i, c;
 	char* filename;
 	int fileID;
-	int len;
-	float f;
 	PrintString("Enter the length of array of float: \n");
 	n = ReadInt();
 	PrintString("Enter all element of array: \n");
@@ -58,8 +54,13 @@ int main() {
 	mergeSort(a, 0, n-1);
 
 	filename = "mergesort.txt";
-	fileID = Open(filename, 0);
+	c = Create(filename);
+	if(c == -1){
+		PrintString("Can't create file mergesort.txt");
+		Halt();
+	}
 
+	fileID = Open(filename, 0);
 	if (fileID == -1)
 	{
 		PrintString("\nFAILED: Can't open file ");

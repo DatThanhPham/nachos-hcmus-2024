@@ -121,12 +121,8 @@ ascii: ascii.o start.o
 	$(LD) $(LDFLAGS) start.o ascii.o -o ascii.coff
 	../bin/coff2noff ascii.coff ascii
 <<<<<<< HEAD
-ascii.o: ascii.c
-	$(CC) $(CFLAGS) -c ascii.c
-ascii: ascii.o start.o
-	$(LD) $(LDFLAGS) start.o ascii.o -o ascii.coff
-	../bin/coff2noff ascii.coff ascii.o: ascii.c
-	$(CC) $(CFLAGS) -c ascii.c
+mergesort.o: mergesort.c
+	$(CC) $(CFLAGS) -c mergesort.c
 mergesort: mergesort.o mergesort.o
 	$(LD) $(LDFLAGS) start.o mergesort.o -o mergesort.coff
 	../bin/coff2noff mergesort.coff mergesort

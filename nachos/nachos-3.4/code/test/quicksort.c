@@ -91,6 +91,7 @@ int main() {
 	int n;
 	int i, j;
 	char* filename;
+	int c;
 	int fileID;
 	PrintString("Enter the length of array of integer: \n");
 	n = ReadInt();
@@ -103,6 +104,11 @@ int main() {
 	quickSort(a, 0, n-1);
 
 	filename = "quicksort.txt";
+	c = Create(filename);
+	if(c == -1){
+		PrintString("Can't create file quicksort.txt");
+		Halt();
+	}
 	fileID = Open(filename, 0);
 
 	if (fileID == -1)
