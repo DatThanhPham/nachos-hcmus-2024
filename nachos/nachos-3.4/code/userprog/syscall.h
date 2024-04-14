@@ -49,6 +49,9 @@
 
 #define SC_WriteFloat 21
 
+// create new semaphore
+#define SC_CreateSemaphore 22
+
 #ifndef IN_ASM
 
 /* The system call interface.  These are the operations the Nachos

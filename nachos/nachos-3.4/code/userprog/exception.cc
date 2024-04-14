@@ -48,6 +48,8 @@
 
 #include "syscall.h"
 
+#include "synch.h"
+
 #include <cctype>
 
 //----------------------------------------------------------------------
@@ -184,13 +186,11 @@ void IncreasePC()
 }
 
 void ExceptionHandler(ExceptionType which)
-
 {
 	//Read type from register 2
 	int type = machine->ReadRegister(2);
 
 	switch (which)
-
 	{
 	// Handle the case when no exception occurs
 	case NoException:
@@ -269,7 +269,6 @@ void ExceptionHandler(ExceptionType which)
 		break;
 
 	case SyscallException:
-
 		switch (type)
 
 		{
@@ -989,7 +988,70 @@ void ExceptionHandler(ExceptionType which)
 
 			break;
 		}
+		case SC_CreateSemaphore:
+		{
+			// Read the virtual address of the semaphore name from register 4
+			int bufferAddress = machine->ReadRegister(4);
 
+			// Read the initial value of the semaphore from register 5
+			int initValue = machine->ReadRegister(5);
+
+			// Convert virtual address to system address and retrieve the semaphore name
+			char *semName = User2System(bufferAddress, 32);
+
+			// Check if the semaphore name is empty
+			if (strlen(semName) == 0)
+			{
+				printf("\n Semaphore name is not valid");
+
+				// Set return value to -1
+				machine->WriteRegister(2, -1);
+
+				// Increment program counter
+				IncreasePC();
+
+				break;
+			}
+
+			// Check if system has enough memory
+			if (semName == NULL)
+			{
+				printf("\n Not enough memory in system");
+
+				// Set return value to -1
+				machine->WriteRegister(2, -1);
+
+				// Increment program counter
+				IncreasePC();
+
+				break;
+			}
+
+			// Create a new semaphore
+			Semaphore *sem = new Semaphore(semName, initValue);
+
+			// Check if semaphore creation is successful
+			if (sem == NULL)
+			{
+				printf("\n Cannot create semaphore '%s'", semName);
+
+				// Set return value to -1
+				machine->WriteRegister(2, -1);
+
+				// Increment program counter
+				IncreasePC();
+
+				break;
+			}
+
+			// Semaphore creation successful, set return value to 0
+			machine->WriteRegister(2, 0);
+
+			// Increment program counter
+			IncreasePC();
+
+			break;
+		}
 		}
 	}
 }
