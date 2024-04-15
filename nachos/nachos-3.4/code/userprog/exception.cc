@@ -1052,6 +1052,27 @@ void ExceptionHandler(ExceptionType which)
 
 			break;
 		}
+		case SC_Join:
+		{
+			int ID = machine->ReadRegister(4); // Read the ID of the space to join from register 4
+			int result = pTab->JoinUpdate(ID); // Call the JoinUpdate function to update the join status of the space
+			machine->WriteRegister(2, result); // Write the result to register 2
+			IncreasePC(); // Increment the program counter
+			break;
+		}
+		case SC_Exit:
+		{
+			int exitStatus = machine->ReadRegister(4); // Read the exit status from register 4
+			if (exitStatus != 0) // Check if the exit status is not 0 (indicating an error)
+			{
+				IncreasePC(); // Increment the program counter
+				break;
+			}
+			int result = pTab->ExitUpdate(exitStatus); // Call the ExitUpdate function to update the exit status of the space
+			machine->WriteRegister(2, result); // Write the result to register 2
+			IncreasePC(); // Increment the program counter
+			break;
+		}
 		}
 	}
 }

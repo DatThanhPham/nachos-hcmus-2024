@@ -52,6 +52,12 @@
 // create new semaphore
 #define SC_CreateSemaphore 22
 
+// Join Space
+#define SC_Join 23
+
+// Exit Space
+#define SC_Exit 24
+
 #ifndef IN_ASM
 
 /* The system call interface.  These are the operations the Nachos
