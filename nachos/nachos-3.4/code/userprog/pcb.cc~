@@ -24,7 +24,7 @@ PCB::PCB(int id)
 PCB::~PCB()
 {
 	if(joinsem != NULL)
-		delete joinsem;
+		delete joinsem; 
 	if(exitsem != NULL)
 		delete exitsem;
 	if(mutex != NULL)
@@ -104,7 +104,7 @@ int PCB::Exec(char *filename, int pID)
 		return -1;
 	}
 	thread->processID= pID;
-	thread->parentID = currentThread->processID;
+	this->parentID = currentThread->processID;
 	thread->Fork(MyStartProcess,pID);
 	mutex->V();
 	return pID;
@@ -114,7 +114,7 @@ int PCB::Exec(char *filename, int pID)
 //*************************************************************************************
 void MyStartProcess(int pID)
 {
-	char *filename= processTab->GetName(pID);
+	char *filename= pTab->GetName(pID);
 	AddrSpace *space= new AddrSpace(filename);
 	if(space == NULL)
 	{

@@ -51,15 +51,8 @@
 
 // create new semaphore
 #define SC_CreateSemaphore 22
-
-// Join Space
-#define SC_Join 23
-
-// Exit Space
-#define SC_Exit 24
-
-//Exec
-#define SC_Exec 25
+#define SC_Up		23
+#define SC_Down 	24
 
 #ifndef IN_ASM
 

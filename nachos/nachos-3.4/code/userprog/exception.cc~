@@ -52,6 +52,7 @@
 
 #include <cctype>
 
+#define MaxFileLength 32
 //----------------------------------------------------------------------
 
 // ExceptionHandler
@@ -1093,13 +1094,111 @@ void ExceptionHandler(ExceptionType which)
 			}
 			delete of;
 
-			int id = processTab->ExecUpdate(name);
+			int id = pTab->ExecUpdate(name);
 			machine->WriteRegister(2, id);
 
 			delete [] name;
 			IncreasePC();
 			return;
 		}
+		case SC_Down:			
+		{
+			//read name from register r4
+			int virtAddr = machine->ReadRegister(4);
+		
+			//Change from user space to system space
+			char *name = User2System(virtAddr, MaxFileLength + 1);
+
+			//check if name is null
+			if(name == NULL)
+			{
+				DEBUG('a', "\n Not enough memory in System");
+
+				printf("\n Not enough memory in System");
+
+				machine->WriteRegister(2, -1); //return error
+
+				delete[] name;
+
+				IncreasePC();
+
+				return;
+			}
+			
+			int res = semTab->Wait(name); //call Wait in class Stable
+
+			if(res == -1)
+			{
+				DEBUG('a', "\n Invalide semaphor name!");
+
+				printf("\n Invalid semaphore name!");
+
+				machine->WriteRegister(2, -1);
+
+				delete[] name;
+
+				IncreasePC();
+
+				return;				
+			}
+			
+			delete[] name;
+
+			machine->WriteRegister(2, res); //save result in register r2
+
+			IncreasePC();
+
+			return;
 		}
+		case SC_Up:		
+		{
+			int virtAddr = machine->ReadRegister(4);
+
+			char *name = User2System(virtAddr, MaxFileLength + 1);
+
+			if(name == NULL)
+			{
+				DEBUG('a', "\n Not enough memory in System");
+
+				printf("\n Not enough memory in System");
+
+				machine->WriteRegister(2, -1);
+
+				delete[] name;
+
+				IncreasePC();
+
+				return;
+			}
+			
+			int res = semTab->Signal(name);
+
+			if(res == -1)
+			{
+				DEBUG('a', "\n Khong ton tai ten semaphore nay!");
+
+				printf("\n Khong ton tai ten semaphore nay!");
+
+				machine->WriteRegister(2, -1);
+
+				delete[] name;
+
+				IncreasePC();
+
+				return;				
+			}
+			
+			delete[] name;
+
+			machine->WriteRegister(2, res);
+
+			IncreasePC();
+
+			return;
+		}
+		default:
+			break;
+		}
+		
 	}
 }

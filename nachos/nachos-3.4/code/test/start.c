@@ -217,13 +217,21 @@ CreateSemaphore:
 	j	$31
 	.end CreateSemaphore
 
-	.globl Exec
-	.ent Exec
-Exec:
-	addiu $2, $0, SC_Exec
+	.globl Up
+	.ent Up
+Up:
+	addiu $2, $0, SC_Up
 	syscall
 	j	$31
-	.end Exec
+	.end Up
+
+	.globl Down
+	.ent Down
+Down:
+	addiu $2, $0, SC_Down
+	syscall
+	j	$31
+	.end Down
 
 
 /* dummy function to keep gcc happy */
