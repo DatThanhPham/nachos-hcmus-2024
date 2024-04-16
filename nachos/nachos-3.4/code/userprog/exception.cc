@@ -1073,6 +1073,33 @@ void ExceptionHandler(ExceptionType which)
 			IncreasePC(); // Increment the program counter
 			break;
 		}
+		case SC_Exec:
+		{
+			int addName = machine->ReadRegister(4);
+			char* name = User2System(addName, 256);
+			if(name == NULL){
+				DEBUG('a', "\n Khong du bo nho trong bo nho");
+				printf("\n Khong du bo nho trong bo nho");
+				machine->WriteRegister(2, -1);
+				IncreasePC();
+				return;
+			}
+			OpenFile *of = fileSystem->Open(name);
+			if(of == NULL){
+				printf("\nExec:: Khong the mo file nay");
+				machine->WriteRegister(2, -1);
+				IncreasePC();
+				return;
+			}
+			delete of;
+
+			int id = pTab->ExecUpdate(name);
+			machine->WriteRegister(2, id);
+
+			delete [] name;
+			IncreasePC();
+			return;
+		}
 		}
 	}
 }

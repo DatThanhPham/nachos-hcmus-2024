@@ -58,6 +58,9 @@
 // Exit Space
 #define SC_Exit 24
 
+//Exec
+#define SC_Exec 25
+
 #ifndef IN_ASM
 
 /* The system call interface.  These are the operations the Nachos
@@ -151,7 +154,8 @@ void Fork(void (*func)());
 /* Yield the CPU to another runnable thread, whether in this address space 
  * or not. 
  */
-void Yield();		
+void Yield();	
+	
 
 #endif /* IN_ASM */
 

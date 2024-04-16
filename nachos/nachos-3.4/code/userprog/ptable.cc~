@@ -3,8 +3,6 @@
 
 PTable::PTable(int size)
 {
-	if(size <0) 
-		return;
 	int i = 0;
 	psize = size;
 	bm = new BitMap(size);

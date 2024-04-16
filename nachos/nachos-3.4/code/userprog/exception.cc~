@@ -48,6 +48,8 @@
 
 #include "syscall.h"
 
+#include "synch.h"
+
 #include <cctype>
 
 //----------------------------------------------------------------------
@@ -184,13 +186,11 @@ void IncreasePC()
 }
 
 void ExceptionHandler(ExceptionType which)
-
 {
 	//Read type from register 2
 	int type = machine->ReadRegister(2);
 
 	switch (which)
-
 	{
 	// Handle the case when no exception occurs
 	case NoException:
@@ -269,7 +269,6 @@ void ExceptionHandler(ExceptionType which)
 		break;
 
 	case SyscallException:
-
 		switch (type)
 
 		{
@@ -870,7 +869,7 @@ void ExceptionHandler(ExceptionType which)
 
 			// Chuyển đổi số nguyên thành số thực
 		    	float f = *(float*)&f_int;
-			printf(buffer, "%f", f);
+			sprintf(buffer, "%f", f);
 			while(buffer[charCount] != '\0'){
 				charCount ++;	
 			}
@@ -989,7 +988,118 @@ void ExceptionHandler(ExceptionType which)
 
 			break;
 		}
+		case SC_CreateSemaphore:
+		{
+			// Read the virtual address of the semaphore name from register 4
+			int bufferAddress = machine->ReadRegister(4);
 
+			// Read the initial value of the semaphore from register 5
+			int initValue = machine->ReadRegister(5);
+
+			// Convert virtual address to system address and retrieve the semaphore name
+			char *semName = User2System(bufferAddress, 32);
+
+			// Check if the semaphore name is empty
+			if (strlen(semName) == 0)
+			{
+				printf("\n Semaphore name is not valid");
+
+				// Set return value to -1
+				machine->WriteRegister(2, -1);
+
+				// Increment program counter
+				IncreasePC();
+
+				break;
+			}
+
+			// Check if system has enough memory
+			if (semName == NULL)
+			{
+				printf("\n Not enough memory in system");
+
+				// Set return value to -1
+				machine->WriteRegister(2, -1);
+
+				// Increment program counter
+				IncreasePC();
+
+				break;
+			}
+
+			// Create a new semaphore
+			Semaphore *sem = new Semaphore(semName, initValue);
+
+			// Check if semaphore creation is successful
+			if (sem == NULL)
+			{
+				printf("\n Cannot create semaphore '%s'", semName);
+
+				// Set return value to -1
+				machine->WriteRegister(2, -1);
+
+				// Increment program counter
+				IncreasePC();
+
+				break;
+			}
+
+			// Semaphore creation successful, set return value to 0
+			machine->WriteRegister(2, 0);
+
+			// Increment program counter
+			IncreasePC();
+
+			break;
+		}
+		case SC_Join:
+		{
+			int ID = machine->ReadRegister(4); // Read the ID of the space to join from register 4
+			int result = pTab->JoinUpdate(ID); // Call the JoinUpdate function to update the join status of the space
+			machine->WriteRegister(2, result); // Write the result to register 2
+			IncreasePC(); // Increment the program counter
+			break;
+		}
+		case SC_Exit:
+		{
+			int exitStatus = machine->ReadRegister(4); // Read the exit status from register 4
+			if (exitStatus != 0) // Check if the exit status is not 0 (indicating an error)
+			{
+				IncreasePC(); // Increment the program counter
+				break;
+			}
+			int result = pTab->ExitUpdate(exitStatus); // Call the ExitUpdate function to update the exit status of the space
+			machine->WriteRegister(2, result); // Write the result to register 2
+			IncreasePC(); // Increment the program counter
+			break;
+		}
+		case SC_Exec:
+		{
+			int addName = machine->ReadRegister(4);
+			char* name = User2System(addName, 256);
+			if(name == NULL){
+				DEBUG('a', "\n Khong du bo nho trong bo nho");
+				printf("\n Khong du bo nho trong bo nho");
+				machine->WriteRegister(2, -1);
+				IncreasePC();
+				return;
+			}
+			OpenFile *of = fileSystem->Open(name);
+			if(of == NULL){
+				printf("\nExec:: Khong the mo file nay");
+				machine->WriteRegister(2, -1);
+				IncreasePC();
+				return;
+			}
+			delete of;
+
+			int id = processTab->ExecUpdate(name);
+			machine->WriteRegister(2, id);
+
+			delete [] name;
+			IncreasePC();
+			return;
+		}
 		}
 	}
 }
