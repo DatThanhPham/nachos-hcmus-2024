@@ -10,9 +10,9 @@ PTable::PTable(int size)
     if (size < 0)
         return;
 
-    psize = size;
+    pSize = size;
     bm = new BitMap(size);
-    bmsem = new Semaphore("bmsem",1);
+    bmSem = new Semaphore("bmsem",1);
 
     For(i,0,MAX_PROCESS){
 		pcb[i] = 0;
@@ -30,13 +30,14 @@ PTable::~PTable()
     if( bm != 0 )
 	delete bm;
     
-    For(i,0,psize){
+    For(i , 0, pSize)
+	{
 		if(pcb[i] != 0)
 			delete pcb[i];
     }
 		
-	if( bmsem != 0)
-		delete bmsem;
+	if( bmSem != 0)
+		delete bmSem;
 }
 
 int PTable::ExecUpdate(char* name)
@@ -44,21 +45,21 @@ int PTable::ExecUpdate(char* name)
 
 
         //Gọi mutex->P(); để giúp tránh tình trạng nạp 2 tiến trình cùng 1 lúc.
-	bmsem->P();
+	bmSem->P();
 	
 	// Kiểm tra tính hợp lệ của chương trình “name”.
         // Kiểm tra sự tồn tại của chương trình “name” bằng cách gọi phương thức Open của lớp fileSystem.
 	if(name == NULL)
 	{
 		printf("\nPTable::Exec : Can't not execute name is NULL.\n");
-		bmsem->V();
+		bmSem->V();
 		return -1;
 	}
 	// So sánh tên chương trình và tên của currentThread để chắc chắn rằng chương trình này không gọi thực thi chính nó.
 	if( strcmp(name,"./test/scheduler") == 0 || strcmp(name,currentThread->getName()) == 0 )
 	{
 		printf("\nPTable::Exec : Can't not execute itself.\n");		
-		bmsem->V();
+		bmSem->V();
 		return -1;
 	}
 
@@ -69,7 +70,7 @@ int PTable::ExecUpdate(char* name)
 	if(index < 0)
 	{
 		printf("\nPTable::Exec :There is no free slot.\n");
-		bmsem->V();
+		bmSem->V();
 		return -1;
 	}
 
@@ -85,7 +86,7 @@ int PTable::ExecUpdate(char* name)
 	int pid = pcb[index]->Exec(name,index);
 
 	// Gọi bmsem->V()
-	bmsem->V();
+	bmSem->V();
 	// Trả về kết quả thực thi của PCB->Exec.
 	return pid;
 }
@@ -123,7 +124,7 @@ int PTable::JoinUpdate(int id)
     // Successfully
 	return ec;
 }
-int PTable::ExitUpdate(int exitcode)
+int PTable::ExitUpdate(int exitCode)
 {              
     // Nếu tiến trình gọi là main process thì gọi Halt().
 	int id = currentThread->processID;
@@ -156,7 +157,7 @@ int PTable::ExitUpdate(int exitcode)
 	pcb[id]->ExitWait();
 	
 	Remove(id);
-	return exitcode;
+	return exitCode;
 }
 
 // Find free slot in order to save the new process infom

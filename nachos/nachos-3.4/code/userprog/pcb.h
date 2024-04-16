@@ -14,11 +14,11 @@
 class PCB
 {
 private:
-    Semaphore* joinsem;         // semaphore cho quá trình join
-    Semaphore* exitsem;         // semaphore cho quá trình exit
+    Semaphore* joinSem;         // semaphore cho quá trình join
+    Semaphore* exitSem;         // semaphore cho quá trình exit
     Semaphore* multex;          // semaphore cho quá trình truy xuất đọc quyền  
 
-    int exitcode;		
+    int exitCode;		
     int numwait;                // số tiến trình đã join
 
     char FileName[32];          // Ten cua tien trinh

@@ -16,11 +16,11 @@
 class PTable
 {
 private:
-	int psize;
-	BitMap *bm;                 // đánh dấu các vị trí đã được sử dụng trong pcb
+	int pSize;
+	BitMap *bm;                 // đánh dấu vị trí đã được sử dụng trong pcb
 	PCB* pcb[MAX_PROCESS];
 
-	Semaphore* bmsem;           // dùng để ngăn chặn trường hợp nạp 2 tiến trình cùng
+	Semaphore* bmSem;           // dùng để ngăn chặn trường hợp nạp 2 tiến trình cùng
 
 public:
      PTable(int = 10);           // Khoi tao size doi tuong pcb
@@ -28,7 +28,7 @@ public:
                                 // Gan gia tri ban dau la null.
     ~PTable();                  // Huy cac doi tuong da tao
 		
-    int ExecUpdate(char*);      // Xử lý cho system call SC_Exit
+    int ExecUpdate(char*);      // Xử lý cho system call SC_Exec
     int ExitUpdate(int);        // Xử lý cho system call SC_Exit
     int JoinUpdate(int);        // Xử lý cho system call SC_Join
 

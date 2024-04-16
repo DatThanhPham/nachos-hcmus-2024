@@ -24,20 +24,20 @@ PCB::PCB(int id)
     else
         this->parentID = currentThread->processID;
 
-	this->numwait = this->exitcode = this->boolBG = 0;
+	this->numwait = this->exitCode = this->boolBG = 0;
 	this->thread = NULL;
 
-	this->joinsem = new Semaphore("joinsem",0);
-	this->exitsem = new Semaphore("exitsem",0);
+	this->joinSem = new Semaphore("joinsem",0);
+	this->exitSem = new Semaphore("exitsem",0);
 	this->multex = new Semaphore("multex",1);
 }
 PCB::~PCB()
 {
 	
-	if(joinsem != NULL)
-		delete this->joinsem;
-	if(exitsem != NULL)
-		delete this->exitsem;
+	if(joinSem != NULL)
+		delete this->joinSem;
+	if(exitSem != NULL)
+		delete this->exitSem;
 	if(multex != NULL)
 		delete this->multex;
 	if(thread != NULL)
@@ -49,23 +49,23 @@ PCB::~PCB()
 }
 int PCB::GetID(){ return this->thread->processID; }
 int PCB::GetNumWait() { return this->numwait; }
-int PCB::GetExitCode() { return this->exitcode; }
+int PCB::GetExitCode() { return this->exitCode; }
 
-void PCB::SetExitCode(int ec){ this->exitcode = ec; }
+void PCB::SetExitCode(int ec){ this->exitCode = ec; }
 
 // Process tranlation to block
 // Wait for JoinRelease to continue exec
 void PCB::JoinWait()
 {
 	//Gọi joinsem->P() để tiến trình chuyển sang trạng thái block và ngừng lại, chờ JoinRelease để thực hiện tiếp.
-    joinsem->P();
+    joinSem->P();
 }
 
 // JoinRelease process calling JoinWait
 void PCB::JoinRelease()
 { 
 	// Gọi joinsem->V() để giải phóng tiến trình gọi JoinWait().
-    joinsem->V();
+    joinSem->V();
 }
 
 // Let process tranlation to block state
@@ -73,14 +73,14 @@ void PCB::JoinRelease()
 void PCB::ExitWait()
 { 
 	// Gọi exitsem-->V() để tiến trình chuyển sang trạng thái block và ngừng lại, chờ ExitReleaseđể thực hiện tiếp.
-    exitsem->P();
+    exitSem->P();
 }
 
 // Release wating process
 void PCB::ExitRelease() 
 {
 	// Gọi exitsem-->V() để giải phóng tiến trình đang chờ.
-    exitsem->V();
+    exitSem->V();
 }
 
 void PCB::IncNumWait()
