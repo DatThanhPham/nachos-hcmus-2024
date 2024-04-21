@@ -16,18 +16,20 @@ class PCB
 private:
     Semaphore* joinSem;         // semaphore cho quá trình join
     Semaphore* exitSem;         // semaphore cho quá trình exit
-    Semaphore* multex;          // semaphore cho quá trình truy xuất đọc quyền  
+    Semaphore* mutex;          // semaphore cho quá trình truy xuất đọc quyền  
 
     int exitCode;		
     int numwait;                // số tiến trình đã join
+
+    int	pid;
 
     char FileName[32];          // Ten cua tien trinh
 
     Thread* thread;             // Tien trinh cua chuong trinh
 public:
     int parentID;               // ID cua tien trinh cha
-    
-    char boolBG;                // Kiem tra neu la tien trinh nen
+
+    int	JoinStatus;
     
     PCB(int = 0);               // Contructor
     ~PCB();                     // Destructor
@@ -54,6 +56,8 @@ public:
     char* GetFileName();        // Tra ve ten tien trinh
 
 };
+
+void MyStartProcess(int pID);
 
 #endif // PCB_H
 

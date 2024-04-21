@@ -1,13 +1,3 @@
-// pcb.cc, "Process Control Block"
-// All rights reserved.
-
-/////////////////////////////////////////////////
-// 	DH KHTN - DHQG TPHCM			/
-// 	1512034 Nguyen Dang Binh		/
-// 	1512042 Nguyen Thanh Chung		/
-// 	1512123 Hoang Ngoc Duc			/
-/////////////////////////////////////////////////
-
 #include "pcb.h"
 #include "utility.h"
 #include "system.h"
@@ -15,22 +5,22 @@
 #include "addrspace.h"
 
 
-extern void StartProcess_2(int id);
-
 PCB::PCB(int id)
-{
-    if (id == 0)
-        this->parentID = -1;
-    else
-        this->parentID = currentThread->processID;
-
-	this->numwait = this->exitCode = this->boolBG = 0;
-	this->thread = NULL;
-
-	this->joinSem = new Semaphore("joinsem",0);
-	this->exitSem = new Semaphore("exitsem",0);
-	this->multex = new Semaphore("multex",1);
+{	
+	joinSem= new Semaphore("JoinSem",0);
+	exitSem= new Semaphore("ExitSem",0);
+	mutex= new Semaphore("Mutex",1);
+	pid= id;
+	exitCode= 0;
+	numwait= 0;
+	if(id)
+		parentID= currentThread->processID;
+	else
+		parentID= 0;
+	thread= NULL;
+	JoinStatus= -1;
 }
+
 PCB::~PCB()
 {
 	
@@ -38,8 +28,8 @@ PCB::~PCB()
 		delete this->joinSem;
 	if(exitSem != NULL)
 		delete this->exitSem;
-	if(multex != NULL)
-		delete this->multex;
+	if(mutex != NULL)
+		delete this->mutex;
 	if(thread != NULL)
 	{		
 		thread->FreeSpace();
@@ -53,78 +43,80 @@ int PCB::GetExitCode() { return this->exitCode; }
 
 void PCB::SetExitCode(int ec){ this->exitCode = ec; }
 
-// Process tranlation to block
-// Wait for JoinRelease to continue exec
 void PCB::JoinWait()
 {
-	//Gọi joinsem->P() để tiến trình chuyển sang trạng thái block và ngừng lại, chờ JoinRelease để thực hiện tiếp.
+
     joinSem->P();
 }
 
-// JoinRelease process calling JoinWait
 void PCB::JoinRelease()
 { 
-	// Gọi joinsem->V() để giải phóng tiến trình gọi JoinWait().
     joinSem->V();
 }
 
-// Let process tranlation to block state
-// Waiting for ExitRelease to continue exec
 void PCB::ExitWait()
 { 
-	// Gọi exitsem-->V() để tiến trình chuyển sang trạng thái block và ngừng lại, chờ ExitReleaseđể thực hiện tiếp.
     exitSem->P();
 }
 
-// Release wating process
 void PCB::ExitRelease() 
 {
-	// Gọi exitsem-->V() để giải phóng tiến trình đang chờ.
     exitSem->V();
 }
 
 void PCB::IncNumWait()
 {
-	multex->P();
+	mutex->P();
 	++numwait;
-	multex->V();
+	mutex->V();
 }
 
 void PCB::DecNumWait()
 {
-	multex->P();
+	mutex->P();
 	if(numwait > 0)
 		--numwait;
-	multex->V();
+	mutex->V();
 }
 
 void PCB::SetFileName(char* fn){ strcpy(FileName,fn);}
 char* PCB::GetFileName() { return this->FileName; }
 
-int PCB::Exec(char* filename, int id)
+int PCB::Exec(char* filename, int pID)
 {  
-    // Gọi mutex->P(); để giúp tránh tình trạng nạp 2 tiến trình cùng 1 lúc.
-	multex->P();
-
-    // Kiểm tra thread đã khởi tạo thành công chưa, nếu chưa thì báo lỗi là không đủ bộ nhớ, gọi mutex->V() và return.             
-	this->thread = new Thread(filename);
-
-	if(this->thread == NULL){
-		printf("\nPCB::Exec:: Not enough memory..!\n");
-        	multex->V();
+   mutex->P();
+	thread= new Thread(filename);
+	if(thread == NULL)
+	{
+		printf("\nLoi: Khong tao duoc tien trinh moi !!!\n");
+		mutex->V();
 		return -1;
 	}
-
-	//  Đặt processID của thread này là id.
-	this->thread->processID = id;
-	// Đặt parrentID của thread này là processID của thread gọi thực thi Exec
-	this->parentID = currentThread->processID;
-	// Gọi thực thi Fork(StartProcess_2,id) => Ta cast thread thành kiểu int, sau đó khi xử ký hàm StartProcess ta cast Thread về đúng kiểu của nó.
- 	this->thread->Fork(StartProcess_2,id);
-
-    	multex->V();
-	// Trả về id.
-	return id;
+	thread->processID= pID;
+	thread->Fork(MyStartProcess,pID);
+	mutex->V();
+	return pID;
 
 }
+
+void MyStartProcess(int pID)
+{
+	char *filename= pTab->GetFileName(pID);
+	AddrSpace *space= new AddrSpace(filename);
+	if(space == NULL)
+	{
+		printf("\nLoi: Khong du bo nho de cap phat cho tien trinh !!!\n");
+		return; 
+	}
+	currentThread->space= space;
+
+	space->InitRegisters();		// set the initial register values
+	space->RestoreState();		// load page table register
+
+	machine->Run();			// jump to the user progam
+	ASSERT(FALSE);			// machine->Run never returns;
+						// the address space exits
+						// by doing the syscall "exit"
+}
+
 

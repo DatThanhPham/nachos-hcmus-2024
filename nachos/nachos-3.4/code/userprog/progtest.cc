@@ -14,40 +14,6 @@
 #include "addrspace.h"
 #include "synch.h"
 
-//----------------------------------------------------------------------
-// StartProcess
-// 	Run a user program.  Open the executable, load it into
-//	memory, and jump to it.
-//----------------------------------------------------------------------
-
-void StartProcess_2(int id)
-{
-    char* fileName = pTab->GetFileName(id);
-
-    AddrSpace *space;
-    space = new AddrSpace(fileName);
-
-	if(space == NULL)
-	{
-		printf("\nPCB::Exec : Can't create AddSpace.");
-		return;
-	}
-
-    currentThread->space = space;
-
-    space->InitRegisters();		
-    space->RestoreState();		
-
-    machine->Run();		
-    ASSERT(FALSE);		
-}
-
-
-//----------------------------------------------------------------------
-// StartProcess
-// 	Run a user program.  Open the executable, load it into
-//	memory, and jump to it.
-//----------------------------------------------------------------------
 
 void
 StartProcess(char *filename)

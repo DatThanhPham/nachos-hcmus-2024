@@ -2,12 +2,7 @@
 //  Process Control Block
 //	Save all information to control the process
 // All rights reserved.
-/////////////////////////////////////////////////
-// 	DH KHTN - DHQG TPHCM			/
-// 	1512034 Nguyen Dang Binh		/
-// 	1512042 Nguyen Thanh Chung		/
-// 	1512123 Hoang Ngoc Duc			/
-/////////////////////////////////////////////////
+
 
 #ifndef PCB_H
 #define PCB_H
@@ -19,20 +14,22 @@
 class PCB
 {
 private:
-    Semaphore* joinsem;         // semaphore cho quá trình join
-    Semaphore* exitsem;         // semaphore cho quá trình exit
+    Semaphore* joinSem;         // semaphore cho quá trình join
+    Semaphore* exitSem;         // semaphore cho quá trình exit
     Semaphore* multex;          // semaphore cho quá trình truy xuất đọc quyền  
 
-    int exitcode;		
+    int exitCode;		
     int numwait;                // số tiến trình đã join
+
+    int	pid;
 
     char FileName[32];          // Ten cua tien trinh
 
     Thread* thread;             // Tien trinh cua chuong trinh
 public:
     int parentID;               // ID cua tien trinh cha
-    
-    char boolBG;                // Kiem tra neu la tien trinh nen
+
+    int	JoinStatus;
     
     PCB(int = 0);               // Contructor
     ~PCB();                     // Destructor
@@ -59,6 +56,8 @@ public:
     char* GetFileName();        // Tra ve ten tien trinh
 
 };
+
+void MyStartProcess(int pID);
 
 #endif // PCB_H
 
