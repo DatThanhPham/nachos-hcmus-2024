@@ -2,12 +2,10 @@
 
 int main()
 {
-	
-	int i;
+	int i;	
 	for(i =0; i< 1000; i++)
 	{
-		PrintChar('A');
+		PrintChar('B');
 	}
-	Halt();	
-	
 }
+
